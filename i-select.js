@@ -1,9 +1,17 @@
 // See for all prototypes: https://developer.mozilla.org/en-US/docs/Web/API
 module.exports = function (window) {
+
     "use strict";
-    var itagsCore = require('itags.core')(window),
-        iSelectProto = itagsCore.defineCE('i-select', function () {
-            this.setHTML('<div>I am inner</div>');
-        }, window.HTMLButtonElement.prototype);
+    var ItagBase = require('itags.core')(window),
+        ISelectClass;
+
+    ISelectClass = ItagBase.subClass('i-select', function() {
+        // ISelectClass.$super.constructor.call(this);
+        this.setHTML('I am rendered '+this.dummy);
+    }, {
+        dummy: 10
+    });
+
+    return ISelectClass;
 
 };
