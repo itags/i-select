@@ -27,6 +27,13 @@
     "engines": {
         "node": "*"
     },
+    "dependencies": {
+        "polyfill": "itsa/polyfill",
+        "event-dom": "itsa/event-dom",
+        "js-ext": "itsa/js-ext",
+        "css": "itsa/css",
+        "itags.core": "itags/core"
+    },
     "devDependencies": {
         "chai": "^1.9.1",
         "istanbul": "^0.3.0",
