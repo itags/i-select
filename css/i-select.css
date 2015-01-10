@@ -1,66 +1,109 @@
-i-select > div {
-    position: relative !important;
+/* ================================= */
+/* set invisiblity when not rendered */
+/* ================================= */
+i-select:not(.itag-rendered) {
+    /* don't set visibility to hidden --> you cannot set a focus on those items */
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    z-index: -1;
 }
 
-i-select > button {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -khtml-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
+i-select:not(.itag-rendered) * {
+    opacity: 0 !important;
+}
+/* ================================= */
+
+
+i-select > div {
+    position: relative;
+}
+
+i-select > button.pure-button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    padding-right: 1.45em;
+    padding-left: 0;
+    max-width: 6em;
+}
+
+i-select > button div.btntext {
+    margin: 0 0.25em 0 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 6em;
+}
+
+i-select > button div.pointer {
+    border-left: 0.4em solid rgba(0, 0, 0, 0);
+    border-right: 0.4em solid rgba(0, 0, 0, 0);
+    border-top: 0.5em solid #000;
+    right: 0.25em;
+    position: absolute;
+    bottom: 0.2em;
 }
 
 i-select > div > div {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    cursor: pointer !important;
-    border-style: solid !important;
-    border-width: 0.1em !important;
-    -webkit-border-radius: 0 0 0.3em 0.3em !important;
-    -moz-border-radius: 0 0 0.3em 0.3em !important;
-    border-radius: 0 0 0.3em 0.3em !important;
-    -webkit-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15) !important;
-    -moz-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15) !important;
-    box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15) !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 0.1em;
+    -webkit-border-radius: 0 0 0.3em 0.3em;
+    -moz-border-radius: 0 0 0.3em 0.3em;
+    border-radius: 0 0 0.3em 0.3em;
+    -webkit-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
+    box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
 }
 
 i-select ul {
-    font-size: 1.2em !important;
-    padding: 0 0 0.3em !important;
-    list-style: none !important;
-    margin: 0 !important;
+    font-size: 1.2em;
+    padding: 0 0 0.3em;
+    list-style: none;
+    margin: 0;
 }
 
 i-select li {
-    padding: 0.25em 0.9em !important;
+    padding: 0.25em 0.7em;
 }
 
 i-select li.focussed {
-    background-color: #B3D4FF !important;
+    background-color: #B3D4FF;
 }
 
 i-select li.selected:before {
-    content: '*' !important;
-    margin-left: -0.7em !important;
-    padding-right: 0.25em !important;
+    content: '*';
+    margin-left: -0.7em;
+    padding-right: 0.25em;
 }
 
 i-select li:before,
 i-select li:after {
-    content: '' !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    content: '';
+    padding: 0;
+    margin: 0;
 }
 
 /* color specification:; */
 
 i-select > div > div {
-    background-color: #FFF !important;
-    border-color: #000 !important;
+    background-color: #FFF;
+    border-color: #000;
 }
 
 i-select li:hover {
-    background-color: #B3D4FF !important;
+    background-color: #B3D4FF;
+}
+
+i-select > button.pure-button-primary div.pointer {
+    border-top: 0.5em solid #FEFEFE;
 }

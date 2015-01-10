@@ -32,7 +32,9 @@
         "event-dom": "itsa/event-dom",
         "js-ext": "itsa/js-ext",
         "css": "itsa/css",
-        "itags.core": "itags/core"
+        "itags.core": "itags/core",
+        "i-head": "itags/i-head",
+        "i-item": "itags/i-item"
     },
     "devDependencies": {
         "chai": "^1.9.1",
