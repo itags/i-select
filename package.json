@@ -24,6 +24,9 @@
         "i-select"
     ],
     "main": "i-select.js",
+    "browserify": {
+        "transform": ["cssify"]
+    },
     "engines": {
         "node": "*"
     },
