@@ -33,6 +33,7 @@ i-select:not(.itag-rendered) * {
 
 i-select > div {
     position: relative;
+    z-index: 2;
 }
 
 i-select > button.pure-button {
@@ -45,7 +46,7 @@ i-select > button.pure-button {
     position: relative;
     padding-right: 1.45em;
     padding-left: 0;
-    max-width: 6em;
+    max-width: 8em;
 }
 
 i-select > button div.btntext {
@@ -53,7 +54,7 @@ i-select > button div.btntext {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 6em;
+    max-width: 8em;
 }
 
 i-select > button div.pointer {
@@ -67,7 +68,6 @@ i-select > button div.pointer {
 
 i-select > div > div {
     position: absolute;
-    z-index: 2;
     left: 0;
     top: 0;
     cursor: pointer;
