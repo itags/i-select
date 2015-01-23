@@ -9,16 +9,21 @@ require('./css/i-select.css');
 
 var TRANS_TIME_SHOW = 0.3,
     TRANS_TIME_HIDE = 0.1,
-    CLASS_ITAG_RENDERED = 'itag-rendered';
+    NATIVE_OBJECT_OBSERVE = !!Object.observe,
+    CLASS_ITAG_RENDERED = 'itag-rendered',
+    utils = require('utils'),
+    laterSilent = utils.laterSilent,
+    later = utils.later;
 
 module.exports = function (window) {
-
+NATIVE_OBJECT_OBSERVE=false;
     "use strict";
 
     require('itags.core')(window);
 
     var DEFAULT_INVALID_VALUE = 'choose',
         itagName = 'i-select',
+        DOCUMENT = window.document,
         Event;
 
     if (!window.ITAGS[itagName]) {
@@ -37,7 +42,7 @@ module.exports = function (window) {
             // cautious:  all child-elements that have `manualfocus` event are
             // subscribed as well: we NEED to inspect e.target and only continue
             // if e.target===i-select
-            if (e.target.getTagName()==='I-SELECT') {
+            if (element.getTagName()==='I-SELECT') {
                 e.preventDefault();
                 element.itagReady().then(
                     function() {
@@ -46,6 +51,32 @@ module.exports = function (window) {
                     }
                 );
             }
+        }, 'i-select');
+
+        Event.after('blur', function(e) {
+            // the i-select itself is unfocussable, but its button is
+            // we need to patch `manualfocus`,
+            // which is emitted on node.focus()
+            // a focus by userinteraction will always appear on the button itself
+            // so we don't bother that
+            var element = e.target,
+                model;
+            // cautious:  all child-elements that have `manualfocus` event are
+            // subscribed as well: we NEED to inspect e.target and only continue.
+            //
+            // I didn;t figure out why, but it seems we need 2 different `later`
+            // functions in order to make the i-select prevent from acting
+            // unpredictable:
+            laterSilent(function() {
+                // if e.target===i-select
+                if ((element.getTagName()==='I-SELECT') && !element.hasClass('focussed')) {
+                    model = element.model;
+                    model.expanded = false;
+                    NATIVE_OBJECT_OBSERVE || later(function() {
+                        DOCUMENT.refreshItags();
+                    }, 150);
+                }
+            },25);
         }, 'i-select');
 
         Event.before('keydown', function(e) {
@@ -57,30 +88,30 @@ module.exports = function (window) {
 
         Event.after(['click', 'keydown'], function(e) {
             var element = e.target.getParent(),
-                expanded, value, liNodes, focusNode;
+                expanded, value, liNodes, focusNode, model;
             if ((e.type==='click') || (e.keyCode===40)) {
                 (e.keyCode===40) && e.preventDefault();
-                expanded = element.model.expanded;
+                model = element.model;
+                expanded = model.expanded;
                 value = element.model.value;
                 if (!expanded) {
                     liNodes = element.getAll('ul[fm-manage] > li');
                     focusNode = liNodes[value-1];
                     focusNode && focusNode.focus();
                 }
-                element.setAttr('expanded', expanded ? 'false' : 'true');
+                model.expanded = !expanded;
             }
         }, 'i-select > button');
 
         Event.after(['click', 'keypress'], function(e) {
             var liNode = e.target,
-                element, index;
+                element, index, model;
             if ((e.type==='click') || (e.keyCode===13)) {
                 element = liNode.inside('i-select');
+                model = element.model;
                 index = liNode.getParent().getAll('li').indexOf(liNode);
-                element.setAttrs([
-                    {name: 'expanded', value: 'false'},
-                    {name: 'value', value: index+1}
-                ]);
+                model.expanded = false;
+                model.value = index+1;
                 element.getElement('button').focus();
             }
         }, 'i-select ul[fm-manage] > li');
@@ -124,12 +155,21 @@ module.exports = function (window) {
                 'invalid-value': 'string'
             },
             sync: function() {
+console.warn('i-select sync');
+                // inside sync, YOU CANNOT change attributes which are part of `args` !!!
+                // those actions will be ignored.
+
+                // BE CAREFUL to start async actions here:
+                // be aware that before ending, this method can run again
+                // if you do, then make sure to handle possible running
+                // async actions well !!!
+
                 var element = this,
                     model = element.model,
                     items = model.items,
                     buttonTexts = model.buttonTexts,
                     value = model.value,
-                    item, content, buttonText, len, i, markValue,
+                    item, content, buttonText, len, i, markValue, containerShowing,
                     button, container, itemsContainer, renderedBefore;
 
                 len = items.length;
@@ -140,22 +180,24 @@ module.exports = function (window) {
                     buttonText = buttonTexts[markValue] || items[markValue];
                 }
                 else {
-                    buttonText = model.invalidValue || DEFAULT_INVALID_VALUE;
+                    buttonText = model['invalid-value'] || DEFAULT_INVALID_VALUE;
                 }
 
                 // rebuild the button:
                 button = element.getElement('button');
-                button.toggleClass('pure-button-primary', model.primaryButton);
+                button.toggleClass('pure-button-primary', model['primary-button']);
                 button.getElement('div.btntext').setHTML(buttonText);
 
                 // show or hide the content, note that when not rendered before, you should use transitions
                 renderedBefore = element.hasClass(CLASS_ITAG_RENDERED);
                 container = element.getElement('>div');
+
+                containerShowing = container.getData('nodeShowed');
                 if (model.expanded) {
-                    container.show(renderedBefore ? TRANS_TIME_SHOW : null);
+                    (containerShowing===true) || container.show(renderedBefore ? TRANS_TIME_SHOW : null);
                 }
                 else {
-                    container.hide(renderedBefore ? TRANS_TIME_HIDE : null);
+                    (containerShowing===false) || container.hide(renderedBefore ? TRANS_TIME_HIDE : null);
                 }
 
                 itemsContainer = element.getElement('ul[fm-manage]');
