@@ -31,12 +31,27 @@ i-select:not(.itag-rendered) * {
 /* ================================= */
 
 
-i-select > div {
+i-select >div {
     position: relative;
     z-index: 2;
+    -webkit-transition: opacity 0.1s;
+    -moz-transition: opacity 0.1s;
+    -ms-transition: opacity 0.1s;
+    -o-transition: opacity 0.1s;
+    transition: opacity 0.1s;
+    opacity: 0;
 }
 
-i-select > button.pure-button {
+i-select >div.i-select-show {
+    -webkit-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -ms-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+    opacity: 1;
+}
+
+i-select >button.pure-button {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -49,7 +64,7 @@ i-select > button.pure-button {
     max-width: 8em;
 }
 
-i-select > button div.btntext {
+i-select >button div.btntext {
     margin: 0 0.25em 0 1em;
     white-space: nowrap;
     overflow: hidden;
@@ -57,7 +72,7 @@ i-select > button div.btntext {
     max-width: 8em;
 }
 
-i-select > button div.pointer {
+i-select >button div.pointer {
     border-left: 0.4em solid rgba(0, 0, 0, 0);
     border-right: 0.4em solid rgba(0, 0, 0, 0);
     border-top: 0.5em solid #000;
@@ -66,7 +81,7 @@ i-select > button div.pointer {
     bottom: 0.2em;
 }
 
-i-select > div > div {
+i-select >div >div {
     position: absolute;
     left: 0;
     top: 0;
@@ -111,7 +126,7 @@ i-select li:after {
 
 /* color specification:; */
 
-i-select > div > div {
+i-select >div >div {
     background-color: #FFF;
     border-color: #000;
 }

@@ -1,28 +1,43 @@
+/**
+ * Provides several methods that override native Element-methods to work with the vdom.
+ *
+ *
+ * <i>Copyright (c) 2014 ITSA - https://github.com/itsa</i>
+ * <br>
+ * New BSD License - http://choosealicense.com/licenses/bsd-3-clause/
+ *
+ * @module vdom
+ * @submodule extend-element
+ * @class Element
+ * @since 0.0.1
+*/
+
+
 /*
 * attributes:
-* value, expanded, primary-button
+* value, expanded, primary-button, invalid-value
 */
+
 require('polyfill/polyfill-base.js');
 require('js-ext/lib/string.js');
 require('css');
 require('./css/i-select.css');
 
-var TRANS_TIME_SHOW = 3,
-    TRANS_TIME_HIDE = 1,
-    NATIVE_OBJECT_OBSERVE = !!Object.observe,
+var NATIVE_OBJECT_OBSERVE = !!Object.observe,
     CLASS_ITAG_RENDERED = 'itag-rendered',
     utils = require('utils'),
-    laterSilent = utils.laterSilent,
-    later = utils.later;
+    laterSilent = utils.laterSilent;
 
 module.exports = function (window) {
     "use strict";
 
-    require('itags.core')(window);
 
     var DEFAULT_INVALID_VALUE = 'choose',
+       itagCore =  require('itags.core')(window),
         itagName = 'i-select',
         DOCUMENT = window.document,
+        HIDDEN = 'itsa-hidden',
+        SHOW = 'i-select-show',
         Event;
 
     if (!window.ITAGS[itagName]) {
@@ -118,7 +133,49 @@ module.exports = function (window) {
             }
         }, 'i-select ul[fm-manage] > li');
 
+        Event.defineEvent('i-select:valuechanged')
+             .unPreventable()
+             .noRender();
+
+        Event.after('itag:changed', function(e) {
+            var element = e.target,
+                prevValue = element.getData('i-select-value'),
+                model = element.model,
+                newValue = model.value,
+                markValue;
+            if (prevValue!==newValue) {
+                markValue = newValue - 1;
+                /**
+                * Emitted when a draggable gets dropped inside a dropzone.
+                *
+                * @event *:dropzone-drop
+                * @param e {Object} eventobject including:
+                * @param e.target {HtmlElement} the dropzone
+                * @since 0.1
+                */
+                Event.emit(e.target, 'i-select:valuechanged', {
+                    prevValue: prevValue,
+                    newValue: newValue,
+                    buttonText: model.buttonTexts[markValue] || model.items[markValue],
+                    listText: model.items[markValue]
+                });
+            }
+            element.setData('i-select-value', newValue);
+        }, itagCore.itagFilter);
+
         window.document.createItag('i-select', {
+           /**
+            * Redefines the childNodes of both the vnode as well as its related dom-node. The new
+            * definition replaces any previous nodes. (without touching unmodified nodes).
+            *
+            * Syncs the new vnode's childNodes with the dom.
+            *
+            * @method _setChildNodes
+            * @param newVChildNodes {Array} array with vnodes which represent the new childNodes
+            * @private
+            * @chainable
+            * @since 0.0.1
+            */
             init: function() {
                 var element = this,
                     itemNodes = element.getAll('>i-item'),
@@ -134,8 +191,12 @@ module.exports = function (window) {
                     }
                     items[items.length] = node.getHTML();
                 });
+
                 element.model.items = items;
                 element.model.buttonTexts = buttonTexts;
+
+                // store its current value, so that valueChange-event can fire:
+                element.setData('i-select-value', element.model.value);
 
                 // building the template of the itag:
                 content = '<button class="pure-button pure-button-bordered"><div class="pointer"></div><div class="btntext"></div></button>';
@@ -150,15 +211,43 @@ module.exports = function (window) {
                 // set the content:
                 element.setHTML(content);
             },
-            args: {
+
+            /*
+             * Internal hash containing all DOM-events that are listened for (at `document`).
+             *
+             * DOMEvents = {
+             *     'click': callbackFn,
+             *     'mousemove': callbackFn,
+             *     'keypress': callbackFn
+             * }
+             *
+             * @property DOMEvents
+             * @default {}
+             * @type Object
+             * @private
+             * @since 0.0.1
+            */
+            attrs: {
                 expanded: 'boolean',
                 'primary-button': 'boolean',
                 value: 'string',
                 'invalid-value': 'string'
             },
+
+           /**
+            * Redefines the childNodes of both the vnode as well as its related dom-node. The new
+            * definition replaces any previous nodes. (without touching unmodified nodes).
+            *
+            * Syncs the new vnode's childNodes with the dom.
+            *
+            * @method _setChildNodes
+            * @param newVChildNodes {Array} array with vnodes which represent the new childNodes
+            * @private
+            * @chainable
+            * @since 0.0.1
+            */
             sync: function() {
-console.warn('sybcing');
-                // inside sync, YOU CANNOT change attributes which are part of `args` !!!
+                // inside sync, YOU CANNOT change attributes which are part of `attrs` !!!
                 // those actions will be ignored.
 
                 // BE CAREFUL to start async actions here:
@@ -171,8 +260,8 @@ console.warn('sybcing');
                     items = model.items,
                     buttonTexts = model.buttonTexts,
                     value = model.value,
-                    item, content, buttonText, len, i, markValue, containerShowing,
-                    button, container, itemsContainer, renderedBefore;
+                    item, content, buttonText, len, i, markValue,
+                    button, container, itemsContainer, renderedBefore, hiddenTimer;
 
                 len = items.length;
                 (value>len) && (value=0);
@@ -194,17 +283,19 @@ console.warn('sybcing');
                 renderedBefore = element.hasClass(CLASS_ITAG_RENDERED);
                 container = element.getElement('>div');
 
-                // NOTE: we can't get showing transitioned work well at the moment.
-                // therefore show and hide imemdiatelyt for now
-                // TODO: fix transition
-                // containerShowing = container.getData('nodeShowed');
                 if (model.expanded) {
-                    container.show();
-                    // (containerShowing===true) || container.show(renderedBefore ? TRANS_TIME_SHOW : null);
+                    hiddenTimer = container.getData('_hiddenTimer');
+                    hiddenTimer && hiddenTimer.cancel();
+                    container.setClass(SHOW);
+                    container.removeClass(HIDDEN);
                 }
                 else {
-                    container.hide();
-                    // (containerShowing===false) || container.hide(renderedBefore ? TRANS_TIME_HIDE : null);
+                    container.removeClass(SHOW);
+                    // hide the layer completely: we need to access anything underneath:
+                    hiddenTimer = laterSilent(function() {
+                        container.setClass(HIDDEN);
+                    }, 110);
+                    container.setData('_hiddenTimer', hiddenTimer);
                 }
 
                 itemsContainer = element.getElement('ul[fm-manage]');
@@ -218,8 +309,8 @@ console.warn('sybcing');
                 itemsContainer.setHTML(content);
             }
         });
+
     }
 
     return window.ITAGS[itagName];
-
 };
