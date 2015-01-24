@@ -7,8 +7,8 @@ require('js-ext/lib/string.js');
 require('css');
 require('./css/i-select.css');
 
-var TRANS_TIME_SHOW = 0.3,
-    TRANS_TIME_HIDE = 0.1,
+var TRANS_TIME_SHOW = 3,
+    TRANS_TIME_HIDE = 1,
     NATIVE_OBJECT_OBSERVE = !!Object.observe,
     CLASS_ITAG_RENDERED = 'itag-rendered',
     utils = require('utils'),
@@ -16,7 +16,6 @@ var TRANS_TIME_SHOW = 0.3,
     later = utils.later;
 
 module.exports = function (window) {
-NATIVE_OBJECT_OBSERVE=false;
     "use strict";
 
     require('itags.core')(window);
@@ -61,22 +60,21 @@ NATIVE_OBJECT_OBSERVE=false;
             // so we don't bother that
             var element = e.target,
                 model;
+            e.preventRender();
             // cautious:  all child-elements that have `manualfocus` event are
             // subscribed as well: we NEED to inspect e.target and only continue.
             //
-            // I didn;t figure out why, but it seems we need 2 different `later`
-            // functions in order to make the i-select prevent from acting
-            // unpredictable:
+            // I didn;t figure out why, but it seems we need `later`
+            // in order to make the i-select prevent from acting unpredictable.
+            // maybe because of the responsetime of the click-event
             laterSilent(function() {
                 // if e.target===i-select
                 if ((element.getTagName()==='I-SELECT') && !element.hasClass('focussed')) {
                     model = element.model;
                     model.expanded = false;
-                    NATIVE_OBJECT_OBSERVE || later(function() {
-                        DOCUMENT.refreshItags();
-                    }, 150);
+                    NATIVE_OBJECT_OBSERVE || DOCUMENT.refreshItags();
                 }
-            },25);
+            },350);
         }, 'i-select');
 
         Event.before('keydown', function(e) {
@@ -86,6 +84,8 @@ NATIVE_OBJECT_OBSERVE=false;
             }
         }, 'i-select > button');
 
+        // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
+        // TODO: figure out why not once
         Event.after(['click', 'keydown'], function(e) {
             var element = e.target.getParent(),
                 expanded, value, liNodes, focusNode, model;
@@ -103,6 +103,8 @@ NATIVE_OBJECT_OBSERVE=false;
             }
         }, 'i-select > button');
 
+        // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
+        // TODO: figure out why not once
         Event.after(['click', 'keypress'], function(e) {
             var liNode = e.target,
                 element, index, model;
@@ -155,7 +157,7 @@ NATIVE_OBJECT_OBSERVE=false;
                 'invalid-value': 'string'
             },
             sync: function() {
-console.warn('i-select sync');
+console.warn('sybcing');
                 // inside sync, YOU CANNOT change attributes which are part of `args` !!!
                 // those actions will be ignored.
 
@@ -192,12 +194,17 @@ console.warn('i-select sync');
                 renderedBefore = element.hasClass(CLASS_ITAG_RENDERED);
                 container = element.getElement('>div');
 
-                containerShowing = container.getData('nodeShowed');
+                // NOTE: we can't get showing transitioned work well at the moment.
+                // therefore show and hide imemdiatelyt for now
+                // TODO: fix transition
+                // containerShowing = container.getData('nodeShowed');
                 if (model.expanded) {
-                    (containerShowing===true) || container.show(renderedBefore ? TRANS_TIME_SHOW : null);
+                    container.show();
+                    // (containerShowing===true) || container.show(renderedBefore ? TRANS_TIME_SHOW : null);
                 }
                 else {
-                    (containerShowing===false) || container.hide(renderedBefore ? TRANS_TIME_HIDE : null);
+                    container.hide();
+                    // (containerShowing===false) || container.hide(renderedBefore ? TRANS_TIME_HIDE : null);
                 }
 
                 itemsContainer = element.getElement('ul[fm-manage]');
@@ -212,5 +219,7 @@ console.warn('i-select sync');
             }
         });
     }
+
+    return window.ITAGS[itagName];
 
 };
