@@ -33,12 +33,12 @@ module.exports = function (window) {
 
 
     var DEFAULT_INVALID_VALUE = 'choose',
-       itagCore =  require('itags.core')(window),
+        itagCore =  require('itags.core')(window),
         itagName = 'i-select',
         DOCUMENT = window.document,
         HIDDEN = 'itsa-hidden',
         SHOW = 'i-select-show',
-        Event;
+        Event, Itag;
 
     if (!window.ITAGS[itagName]) {
         Event = require('event-dom')(window);
@@ -133,11 +133,11 @@ module.exports = function (window) {
             }
         }, 'i-select ul[fm-manage] > li');
 
-        Event.defineEvent('i-select:valuechanged')
+        Event.defineEvent('i-select:valuechange')
              .unPreventable()
              .noRender();
 
-        Event.after('itag:changed', function(e) {
+        Event.after('itag:change', function(e) {
             var element = e.target,
                 prevValue = element.getData('i-select-value'),
                 model = element.model,
@@ -153,7 +153,7 @@ module.exports = function (window) {
                 * @param e.target {HtmlElement} the dropzone
                 * @since 0.1
                 */
-                Event.emit(e.target, 'i-select:valuechanged', {
+                Event.emit(e.target, 'i-select:valuechange', {
                     prevValue: prevValue,
                     newValue: newValue,
                     buttonText: model.buttonTexts[markValue] || model.items[markValue],
@@ -163,7 +163,7 @@ module.exports = function (window) {
             element.setData('i-select-value', newValue);
         }, itagCore.itagFilter);
 
-        window.document.createItag('i-select', {
+        Itag = DOCUMENT.createItag(itagName, {
            /**
             * Redefines the childNodes of both the vnode as well as its related dom-node. The new
             * definition replaces any previous nodes. (without touching unmodified nodes).
@@ -310,6 +310,9 @@ module.exports = function (window) {
             }
         });
 
+        Itag.setItagDirectEventResponse(['blur', 'keypress']);
+
+        window.ITAGS[itagName] = Itag;
     }
 
     return window.ITAGS[itagName];
