@@ -24,7 +24,6 @@ require('css');
 require('./css/i-select.css');
 
 var NATIVE_OBJECT_OBSERVE = !!Object.observe,
-    CLASS_ITAG_RENDERED = 'itag-rendered',
     utils = require('utils'),
     laterSilent = utils.laterSilent;
 
@@ -46,26 +45,25 @@ module.exports = function (window) {
         require('i-item')(window);
         require('i-head')(window);
 
-        Event.before('manualfocus', function(e) {
+        Event.before(itagName+':manualfocus', function(e) {
             // the i-select itself is unfocussable, but its button is
             // we need to patch `manualfocus`,
             // which is emitted on node.focus()
             // a focus by userinteraction will always appear on the button itself
             // so we don't bother that
             var element = e.target;
+            e.preventDefault();
             // cautious:  all child-elements that have `manualfocus` event are
             // subscribed as well: we NEED to inspect e.target and only continue
             // if e.target===i-select
-            if (element.getTagName()==='I-SELECT') {
-                e.preventDefault();
-                element.itagReady().then(
-                    function() {
-                        var button = element.getElement('button');
-                        button && button.focus();
-                    }
-                );
-            }
-        }, 'i-select');
+            e.preventDefault();
+            element.itagReady().then(
+                function() {
+                    var button = element.getElement('button');
+                    button && button.focus();
+                }
+            );
+        });
 
         Event.after('blur', function(e) {
             // the i-select itself is unfocussable, but its button is
@@ -133,11 +131,11 @@ module.exports = function (window) {
             }
         }, 'i-select ul[fm-manage] > li');
 
-        Event.defineEvent('i-select:valuechange')
+        Event.defineEvent(itagName+':valuechange')
              .unPreventable()
              .noRender();
 
-        Event.after('itag:change', function(e) {
+        Event.after('*:change', function(e) {
             var element = e.target,
                 prevValue = element.getData('i-select-value'),
                 model = element.model,
@@ -145,15 +143,20 @@ module.exports = function (window) {
                 markValue;
             if (prevValue!==newValue) {
                 markValue = newValue - 1;
+
                 /**
-                * Emitted when a draggable gets dropped inside a dropzone.
+                * Emitted when a the i-select changes its value
                 *
-                * @event *:dropzone-drop
+                * @event i-select:valuechange
                 * @param e {Object} eventobject including:
-                * @param e.target {HtmlElement} the dropzone
+                * @param e.target {HtmlElement} the i-select element
+                * @param e.prevValue {Number} the selected item, starting with 1
+                * @param e.newValue {Number} the selected item, starting with 1
+                * @param e.buttonText {String} the text that will appear on the button
+                * @param e.listText {String} the text as it is in the list
                 * @since 0.1
                 */
-                Event.emit(e.target, 'i-select:valuechange', {
+                element.emit('valuechange', {
                     prevValue: prevValue,
                     newValue: newValue,
                     buttonText: model.buttonTexts[markValue] || model.items[markValue],
@@ -164,54 +167,6 @@ module.exports = function (window) {
         }, itagCore.itagFilter);
 
         Itag = DOCUMENT.createItag(itagName, {
-           /**
-            * Redefines the childNodes of both the vnode as well as its related dom-node. The new
-            * definition replaces any previous nodes. (without touching unmodified nodes).
-            *
-            * Syncs the new vnode's childNodes with the dom.
-            *
-            * @method _setChildNodes
-            * @param newVChildNodes {Array} array with vnodes which represent the new childNodes
-            * @private
-            * @chainable
-            * @since 0.0.1
-            */
-            init: function() {
-                var element = this,
-                    itemNodes = element.getAll('>i-item'),
-                    items = [],
-                    buttonTexts = [],
-                    content;
-
-                itemNodes.forEach(function(node, i) {
-                    var header = node.getElement('i-head');
-                    if (header) {
-                        buttonTexts[i] = header.getHTML();
-                        header.remove(true);
-                    }
-                    items[items.length] = node.getHTML();
-                });
-
-                element.model.items = items;
-                element.model.buttonTexts = buttonTexts;
-
-                // store its current value, so that valueChange-event can fire:
-                element.setData('i-select-value', element.model.value);
-
-                // building the template of the itag:
-                content = '<button class="pure-button pure-button-bordered"><div class="pointer"></div><div class="btntext"></div></button>';
-                // first: outerdiv which will be relative positioned
-                // next: innerdiv which will be absolute positioned
-                // also: hide the container by default --> updateUI could make it shown
-                content += '<div class="itsa-hidden">' +
-                             '<div>'+
-                               '<ul fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
-                             '</div>'+
-                           '</div>';
-                // set the content:
-                element.setHTML(content);
-            },
-
             /*
              * Internal hash containing all DOM-events that are listened for (at `document`).
              *
@@ -246,6 +201,53 @@ module.exports = function (window) {
             * @chainable
             * @since 0.0.1
             */
+            init: function() {
+                var element = this,
+                    itemNodes = element.getAll('>i-item'),
+                    items = [],
+                    buttonTexts = [],
+                    content;
+                itemNodes.forEach(function(node, i) {
+                    var header = node.getElement('i-head');
+                    if (header) {
+                        buttonTexts[i] = header.getHTML();
+                        header.remove(true);
+                    }
+                    items[items.length] = node.getHTML();
+                });
+
+                element.model.items = items;
+                element.model.buttonTexts = buttonTexts;
+
+                // store its current value, so that valueChange-event can fire:
+                element.setData('i-select-value', element.model.value);
+
+                // building the template of the itag:
+                content = '<button class="pure-button pure-button-bordered"><div class="pointer"></div><div class="btntext"></div></button>';
+                // first: outerdiv which will be relative positioned
+                // next: innerdiv which will be absolute positioned
+                // also: hide the container by default --> updateUI could make it shown
+                content += '<div class="itsa-hidden">' +
+                             '<div>'+
+                               '<ul fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
+                             '</div>'+
+                           '</div>';
+                // set the content:
+                element.setHTML(content);
+            },
+
+           /**
+            * Redefines the childNodes of both the vnode as well as its related dom-node. The new
+            * definition replaces any previous nodes. (without touching unmodified nodes).
+            *
+            * Syncs the new vnode's childNodes with the dom.
+            *
+            * @method _setChildNodes
+            * @param newVChildNodes {Array} array with vnodes which represent the new childNodes
+            * @private
+            * @chainable
+            * @since 0.0.1
+            */
             sync: function() {
                 // inside sync, YOU CANNOT change attributes which are part of `attrs` !!!
                 // those actions will be ignored.
@@ -261,7 +263,7 @@ module.exports = function (window) {
                     buttonTexts = model.buttonTexts,
                     value = model.value,
                     item, content, buttonText, len, i, markValue,
-                    button, container, itemsContainer, renderedBefore, hiddenTimer;
+                    button, container, itemsContainer, hiddenTimer;
 
                 len = items.length;
                 (value>len) && (value=0);
@@ -279,8 +281,6 @@ module.exports = function (window) {
                 button.toggleClass('pure-button-primary', model['primary-button']);
                 button.getElement('div.btntext').setHTML(buttonText);
 
-                // show or hide the content, note that when not rendered before, you should use transitions
-                renderedBefore = element.hasClass(CLASS_ITAG_RENDERED);
                 container = element.getElement('>div');
 
                 if (model.expanded) {
@@ -311,8 +311,6 @@ module.exports = function (window) {
         });
 
         Itag.setItagDirectEventResponse(['blur', 'keypress']);
-
-        window.ITAGS[itagName] = Itag;
     }
 
     return window.ITAGS[itagName];

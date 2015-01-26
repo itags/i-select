@@ -32,6 +32,7 @@
     },
     "dependencies": {
         "polyfill": "itsa/polyfill",
+        "focusmanager": "itsa/focusmanager",
         "event-dom": "itsa/event-dom",
         "js-ext": "itsa/js-ext",
         "css": "itsa/css",
