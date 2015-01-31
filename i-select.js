@@ -127,7 +127,7 @@ module.exports = function (window) {
                 index = liNode.getParent().getAll('li').indexOf(liNode);
                 model.expanded = false;
                 model.value = index+1;
-                element.getElement('button').focus();
+                element.focus();
             }
         }, 'i-select ul[fm-manage] > li');
 
@@ -256,7 +256,7 @@ module.exports = function (window) {
                 // be aware that before ending, this method can run again
                 // if you do, then make sure to handle possible running
                 // async actions well !!!
-
+console.info('i-select begin sync');
                 var element = this,
                     model = element.model,
                     items = model.items,
@@ -307,6 +307,7 @@ module.exports = function (window) {
 
                 // set the items:
                 itemsContainer.setHTML(content);
+console.info('i-select end sync');
             }
         });
 
