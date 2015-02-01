@@ -40,7 +40,7 @@ module.exports = function (window) {
         Event, Itag;
 
     if (!window.ITAGS[itagName]) {
-        Event = require('event-dom')(window);
+        Event = require('event-mobile')(window);
         require('focusmanager')(window);
         require('i-item')(window);
         require('i-head')(window);
@@ -77,9 +77,8 @@ module.exports = function (window) {
             // cautious:  all child-elements that have `manualfocus` event are
             // subscribed as well: we NEED to inspect e.target and only continue.
             //
-            // I didn;t figure out why, but it seems we need `later`
+            // I didn't figure out why, but it seems we need `later`
             // in order to make the i-select prevent from acting unpredictable.
-            // maybe because of the responsetime of the click-event
             laterSilent(function() {
                 // if e.target===i-select
                 if ((element.getTagName()==='I-SELECT') && !element.hasClass('focussed')) {
@@ -99,29 +98,22 @@ module.exports = function (window) {
 
         // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
         // TODO: figure out why not once
-        Event.after(['click', 'keydown'], function(e) {
+        Event.after(['tap', 'keydown'], function(e) {
             var element = e.target.getParent(),
-                expanded, value, liNodes, focusNode, model;
-            if ((e.type==='click') || (e.keyCode===40)) {
+                model;
+            if ((e.type==='tap') || (e.keyCode===40)) {
                 (e.keyCode===40) && e.preventDefault();
                 model = element.model;
-                expanded = model.expanded;
-                value = element.model.value;
-                if (!expanded) {
-                    liNodes = element.getAll('ul[fm-manage] > li');
-                    focusNode = liNodes[value-1];
-                    focusNode && focusNode.focus();
-                }
-                model.expanded = !expanded;
+                model.expanded = !model.expanded;
             }
         }, 'i-select > button');
 
         // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
         // TODO: figure out why not once
-        Event.after(['click', 'keypress'], function(e) {
+        Event.after(['tap', 'keypress'], function(e) {
             var liNode = e.target,
                 element, index, model;
-            if ((e.type==='click') || (e.keyCode===13)) {
+            if ((e.type==='tap') || (e.keyCode===13)) {
                 element = liNode.inside('i-select');
                 model = element.model;
                 index = liNode.getParent().getAll('li').indexOf(liNode);
@@ -168,18 +160,9 @@ module.exports = function (window) {
 
         Itag = DOCUMENT.createItag(itagName, {
             /*
-             * Internal hash containing all DOM-events that are listened for (at `document`).
              *
-             * DOMEvents = {
-             *     'click': callbackFn,
-             *     'mousemove': callbackFn,
-             *     'keypress': callbackFn
-             * }
-             *
-             * @property DOMEvents
-             * @default {}
+             * @property attrs
              * @type Object
-             * @private
              * @since 0.0.1
             */
             attrs: {
@@ -256,14 +239,12 @@ module.exports = function (window) {
                 // be aware that before ending, this method can run again
                 // if you do, then make sure to handle possible running
                 // async actions well !!!
-console.info('i-select begins sync '+(new Date()).getTime());
-
                 var element = this,
                     model = element.model,
                     items = model.items,
                     buttonTexts = model.buttonTexts,
                     value = model.value,
-                    item, content, buttonText, len, i, markValue,
+                    item, content, buttonText, len, i, markValue, ulNode,
                     button, container, itemsContainer, hiddenTimer;
 
                 len = items.length;
@@ -279,7 +260,7 @@ console.info('i-select begins sync '+(new Date()).getTime());
 
                 // rebuild the button:
                 button = element.getElement('button');
-                button.toggleClass('pure-button-primary', model['primary-button']);
+                button.toggleClass('pure-button-primary', !!model['primary-button']);
                 button.getElement('div.btntext').setHTML(buttonText);
 
                 container = element.getElement('>div');
@@ -287,6 +268,8 @@ console.info('i-select begins sync '+(new Date()).getTime());
                 if (model.expanded) {
                     hiddenTimer = container.getData('_hiddenTimer');
                     hiddenTimer && hiddenTimer.cancel();
+                    ulNode = element.getElement('ul[fm-manage]');
+                    ulNode.focus();
                     container.setClass(SHOW);
                     container.removeClass(HIDDEN);
                 }
@@ -308,11 +291,10 @@ console.info('i-select begins sync '+(new Date()).getTime());
 
                 // set the items:
                 itemsContainer.setHTML(content);
-console.info('i-select ends sync '+(new Date()).getTime());
             }
         });
 
-        Itag.setItagDirectEventResponse('keypress');
+        Itag.setItagDirectEventResponse(['keypress', 'keydown']);
     }
 
     return window.ITAGS[itagName];
