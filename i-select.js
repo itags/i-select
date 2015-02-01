@@ -256,7 +256,8 @@ module.exports = function (window) {
                 // be aware that before ending, this method can run again
                 // if you do, then make sure to handle possible running
                 // async actions well !!!
-console.info('i-select begin sync');
+console.info('i-select begins sync '+(new Date()).getTime());
+
                 var element = this,
                     model = element.model,
                     items = model.items,
@@ -307,11 +308,11 @@ console.info('i-select begin sync');
 
                 // set the items:
                 itemsContainer.setHTML(content);
-console.info('i-select end sync');
+console.info('i-select ends sync '+(new Date()).getTime());
             }
         });
 
-        Itag.setItagDirectEventResponse(['blur', 'keypress']);
+        Itag.setItagDirectEventResponse('keypress');
     }
 
     return window.ITAGS[itagName];
