@@ -34,6 +34,7 @@
         "polyfill": "itsa/polyfill",
         "focusmanager": "itsa/focusmanager",
         "event-mobile": "itsa/event-mobile",
+        "event-dom": "itsa/event-dom",
         "js-ext": "itsa/js-ext",
         "css": "itsa/css",
         "itags.core": "itags/core",

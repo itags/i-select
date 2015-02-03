@@ -23,8 +23,8 @@ require('js-ext/lib/string.js');
 require('css');
 require('./css/i-select.css');
 
-var NATIVE_OBJECT_OBSERVE = !!Object.observe,
-    utils = require('utils'),
+var utils = require('utils'),
+    asyncSilent = utils.asyncSilent,
     laterSilent = utils.laterSilent;
 
 module.exports = function (window) {
@@ -41,6 +41,7 @@ module.exports = function (window) {
 
     if (!window.ITAGS[itagName]) {
         Event = require('event-mobile')(window);
+        require('event-dom/extra/blurnode.js')(window);
         require('focusmanager')(window);
         require('i-item')(window);
         require('i-head')(window);
@@ -51,20 +52,11 @@ module.exports = function (window) {
             // which is emitted on node.focus()
             // a focus by userinteraction will always appear on the button itself
             // so we don't bother that
-            var element = e.target;
+            var button = e.target.getElement('button');
             e.preventDefault();
-            // cautious:  all child-elements that have `manualfocus` event are
-            // subscribed as well: we NEED to inspect e.target and only continue
-            // if e.target===i-select
-            e.preventDefault();
-            element.itagReady().then(
-                function() {
-                    var button = element.getElement('button');
-                    button && button.focus();
-                }
-            );
+            button && button.focus(true);
         });
-
+/*
         Event.after('blur', function(e) {
             // the i-select itself is unfocussable, but its button is
             // we need to patch `manualfocus`,
@@ -79,14 +71,36 @@ module.exports = function (window) {
             //
             // I didn't figure out why, but it seems we need `later`
             // in order to make the i-select prevent from acting unpredictable.
+console.warn('blur');
+console.warn(e);
             laterSilent(function() {
                 // if e.target===i-select
                 if ((element.getTagName()==='I-SELECT') && !element.hasClass('focussed')) {
                     model = element.model;
                     model.expanded = false;
-                    NATIVE_OBJECT_OBSERVE || DOCUMENT.refreshItags();
+                    DOCUMENT.refreshItags();
                 }
             },350);
+        }, 'i-select');
+*/
+        Event.after(['xblurnode', 'clickoutside'], function(e) {
+            console.warn(e.type);
+            // the i-select itself is unfocussable, but its button is
+            // we need to patch `manualfocus`,
+            // which is emitted on node.focus()
+            // a focus by userinteraction will always appear on the button itself
+            // so we don't bother that
+            var model = e.target.model;
+            model.expanded = false;
+            DOCUMENT.refreshItags();
+        }, 'i-select');
+
+        Event.before(['focusoutside', 'clickoutside'], function(e) {
+            // the i-select itself is unfocussable, but its button is
+            // we need to patch `manualfocus`,
+            // which is emitted on node.focus()
+            // a focus by userinteraction will always appear on the button itself
+            // so we don't bother that
         }, 'i-select');
 
         Event.before('keydown', function(e) {
@@ -96,30 +110,50 @@ module.exports = function (window) {
             }
         }, 'i-select > button');
 
-        // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
-        // TODO: figure out why not once
-        Event.after(['tap', 'keydown'], function(e) {
+        // CAUTIOUS: it seems `tap` will sometime MISS its event!
+        // TODO: figure out why
+        // That's why we ONLY listen for click (not click+tap) --> which would lead reversing toggling
+        Event.after(['click', 'keydown'], function(e) {
             var element = e.target.getParent(),
-                model;
-            if ((e.type==='tap') || (e.keyCode===40)) {
-                (e.keyCode===40) && e.preventDefault();
+                model, ulNode, liNode;
+            if ((e.type==='click') || (e.keyCode===40)) {
                 model = element.model;
-                model.expanded = !model.expanded;
+                if (e.keyCode===40) {
+                    e.preventDefault();
+                    model.expanded = true;
+                }
+                else {
+                    model.expanded = !model.expanded;
+                    if (!model.expanded) {
+                        liNode = element.getElement('ul[fm-manage] >li[fm-defaultitem]');
+                        liNode && liNode.focus(true);
+                    }
+                }
+                if (model.expanded) {
+                    ulNode = element.getElement('ul[fm-manage]');
+                    ulNode && ulNode.focus(true);
+                }
             }
         }, 'i-select > button');
 
-        // CAUTIOUS: it seems `tap` will be subscribed 8 times!!!
-        // TODO: figure out why not once
-        Event.after(['tap', 'keypress'], function(e) {
+        // CAUTIOUS: it seems `tap` will sometime MISS its event!
+        // TODO: figure out why
+        Event.after(['tap', 'click', 'keypress'], function(e) {
             var liNode = e.target,
-                element, index, model;
-            if ((e.type==='tap') || (e.keyCode===13)) {
+                element, index, model, ulNode;
+            if ((e.type==='tap') || (e.type==='click') || (e.keyCode===13)) {
                 element = liNode.inside('i-select');
                 model = element.model;
-                index = liNode.getParent().getAll('li').indexOf(liNode);
+                ulNode = liNode.getParent();
+                index = ulNode.getAll('li').indexOf(liNode);
                 model.expanded = false;
                 model.value = index+1;
-                element.focus();
+                // prevent that the focus will be reset to the focusmanager
+                // when re-synced --> we want the focus on the button:
+                asyncSilent(function() {
+                    ulNode.removeClass('focussed');
+                    element.focus(true);
+                });
             }
         }, 'i-select ul[fm-manage] > li');
 
@@ -199,8 +233,8 @@ module.exports = function (window) {
                     items[items.length] = node.getHTML();
                 });
 
-                element.model.items = items;
-                element.model.buttonTexts = buttonTexts;
+                element.setValueOnce('items', items);
+                element.setValueOnce('buttonTexts', buttonTexts);
 
                 // store its current value, so that valueChange-event can fire:
                 element.setData('i-select-value', element.model.value);
@@ -244,7 +278,7 @@ module.exports = function (window) {
                     items = model.items,
                     buttonTexts = model.buttonTexts,
                     value = model.value,
-                    item, content, buttonText, len, i, markValue, ulNode,
+                    item, content, buttonText, len, i, markValue,
                     button, container, itemsContainer, hiddenTimer;
 
                 len = items.length;
@@ -268,8 +302,6 @@ module.exports = function (window) {
                 if (model.expanded) {
                     hiddenTimer = container.getData('_hiddenTimer');
                     hiddenTimer && hiddenTimer.cancel();
-                    ulNode = element.getElement('ul[fm-manage]');
-                    ulNode.focus();
                     container.setClass(SHOW);
                     container.removeClass(HIDDEN);
                 }
@@ -286,7 +318,7 @@ module.exports = function (window) {
                 content = '';
                 for (i=0; i<len; i++) {
                     item = items[i];
-                    content += '<li'+((i===markValue) ? ' class="selected"' : '')+'>'+item+'</li>';
+                    content += '<li'+((i===markValue) ? ' class="selected" fm-defaultitem="true"' : '')+'>'+item+'</li>';
                 }
 
                 // set the items:
