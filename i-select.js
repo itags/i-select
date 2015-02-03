@@ -25,7 +25,9 @@ require('./css/i-select.css');
 
 var utils = require('utils'),
     asyncSilent = utils.asyncSilent,
-    laterSilent = utils.laterSilent;
+    laterSilent = utils.laterSilent,
+    DELAY_BLURCLOSE = 125,
+    SUPPRESS_DELAY = 175;
 
 module.exports = function (window) {
     "use strict";
@@ -52,56 +54,15 @@ module.exports = function (window) {
             // which is emitted on node.focus()
             // a focus by userinteraction will always appear on the button itself
             // so we don't bother that
-            var button = e.target.getElement('button');
+            var element = e.target;
             e.preventDefault();
-            button && button.focus(true);
-        });
-/*
-        Event.after('blur', function(e) {
-            // the i-select itself is unfocussable, but its button is
-            // we need to patch `manualfocus`,
-            // which is emitted on node.focus()
-            // a focus by userinteraction will always appear on the button itself
-            // so we don't bother that
-            var element = e.target,
-                model;
-            e.preventRender();
-            // cautious:  all child-elements that have `manualfocus` event are
-            // subscribed as well: we NEED to inspect e.target and only continue.
-            //
-            // I didn't figure out why, but it seems we need `later`
-            // in order to make the i-select prevent from acting unpredictable.
-console.warn('blur');
-console.warn(e);
-            laterSilent(function() {
-                // if e.target===i-select
-                if ((element.getTagName()==='I-SELECT') && !element.hasClass('focussed')) {
-                    model = element.model;
-                    model.expanded = false;
-                    DOCUMENT.refreshItags();
+            element.itagReady().then(
+                function() {
+                    var button = element.getElement('button');
+                    button && button.focus(true);
                 }
-            },350);
-        }, 'i-select');
-*/
-        Event.after(['xblurnode', 'clickoutside'], function(e) {
-            console.warn(e.type);
-            // the i-select itself is unfocussable, but its button is
-            // we need to patch `manualfocus`,
-            // which is emitted on node.focus()
-            // a focus by userinteraction will always appear on the button itself
-            // so we don't bother that
-            var model = e.target.model;
-            model.expanded = false;
-            DOCUMENT.refreshItags();
-        }, 'i-select');
-
-        Event.before(['focusoutside', 'clickoutside'], function(e) {
-            // the i-select itself is unfocussable, but its button is
-            // we need to patch `manualfocus`,
-            // which is emitted on node.focus()
-            // a focus by userinteraction will always appear on the button itself
-            // so we don't bother that
-        }, 'i-select');
+            );
+        });
 
         Event.before('keydown', function(e) {
             if (e.keyCode===40) {
@@ -110,19 +71,22 @@ console.warn(e);
             }
         }, 'i-select > button');
 
-        // CAUTIOUS: it seems `tap` will sometime MISS its event!
-        // TODO: figure out why
-        // That's why we ONLY listen for click (not click+tap) --> which would lead reversing toggling
-        Event.after(['click', 'keydown'], function(e) {
+        Event.after(['tap', 'keydown'], function(e) {
             var element = e.target.getParent(),
-                model, ulNode, liNode;
-            if ((e.type==='click') || (e.keyCode===40)) {
+                e_type = e.type,
+                model, ulNode, liNode, inactive;
+            if ((e_type==='tap') || (e.keyCode===40)) {
                 model = element.model;
                 if (e.keyCode===40) {
                     e.preventDefault();
                     model.expanded = true;
                 }
                 else {
+                    inactive = element.hasData('_suppressClose');
+                    if (inactive) {
+                        console.warn('not reacting to '+e_type+'-event: button is in pauzed state');
+                        return;
+                    }
                     model.expanded = !model.expanded;
                     if (!model.expanded) {
                         liNode = element.getElement('ul[fm-manage] >li[fm-defaultitem]');
@@ -133,27 +97,51 @@ console.warn(e);
                     ulNode = element.getElement('ul[fm-manage]');
                     ulNode && ulNode.focus(true);
                 }
+                if (model.expanded || (e_type==='tap')) {
+                    element.setData('_suppressClose', true);
+                    laterSilent(function() {
+                        element.removeData('_suppressClose');
+                    }, SUPPRESS_DELAY);
+                    ulNode = element.getElement('ul[fm-manage]');
+                    ulNode && ulNode.focus(true);
+                }
             }
         }, 'i-select > button');
 
-        // CAUTIOUS: it seems `tap` will sometime MISS its event!
-        // TODO: figure out why
-        Event.after(['tap', 'click', 'keypress'], function(e) {
+        Event.after(['tap', 'keypress'], function(e) {
             var liNode = e.target,
-                element, index, model, ulNode;
-            if ((e.type==='tap') || (e.type==='click') || (e.keyCode===13)) {
+                e_type = e.type,
+                element, index, ulNode, model, inactive;
+            if ((e_type==='tap') || (e.keyCode===13)) {
                 element = liNode.inside('i-select');
                 model = element.model;
-                ulNode = liNode.getParent();
-                index = ulNode.getAll('li').indexOf(liNode);
-                model.expanded = false;
-                model.value = index+1;
-                // prevent that the focus will be reset to the focusmanager
-                // when re-synced --> we want the focus on the button:
-                asyncSilent(function() {
+                // check for model.expanded --> a hidden selectbox might react on an enterpress
+                if (model.expanded) {
+                    inactive = element.hasData('_suppressClose');
+                    if (inactive) {
+                        console.warn('not reacting to '+e_type+'-event: button is in pauzed state');
+                        return;
+                    }
+                    model = element.model;
+                    ulNode = liNode.getParent();
+                    index = ulNode.getAll('li').indexOf(liNode);
+                    model.expanded = false;
+                    model.value = index+1;
+                    if (e_type==='tap') {
+                        element.setData('_suppressClose', true);
+                        laterSilent(function() {
+                            element.removeData('_suppressClose');
+                        }, SUPPRESS_DELAY);
+                        ulNode = element.getElement('ul[fm-manage]');
+                        ulNode && ulNode.focus(true);
+                    }
+                    // prevent that the focus will be reset to the focusmanager
+                    // when re-synced --> we want the focus on the button:
                     ulNode.removeClass('focussed');
-                    element.focus(true);
-                });
+                    asyncSilent(function() {
+                        element.focus(true);
+                    });
+                }
             }
         }, 'i-select ul[fm-manage] > li');
 
@@ -249,8 +237,34 @@ console.warn(e);
                                '<ul fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
                              '</div>'+
                            '</div>';
+
+                element.setupEvents();
                 // set the content:
                 element.setHTML(content);
+            },
+
+            setupEvents: function() {
+                var element = this;
+                Event.after('tapoutside', function(e) {
+                    // at the end of the eventstack: give `tapoutside` a way to set the '_suppressClose'-data when needed
+                    // just async will do
+                    asyncSilent(function() {
+                        if (!element.hasData('_suppressClose') && !element.contains(e.sourceTarget)) {
+                            element.model.expanded = false;
+                            DOCUMENT.refreshItags();
+                        }
+                    });
+                }, 'i-select');
+                element.selfAfter('blurnode', function() {
+                    // at the end of the eventstack: give `blurnode` a way to set the '_suppressClose'-data when needed
+                    // need a bit more time because there is time inbetween the blur vs click events
+                    laterSilent(function() {
+                        if (!element.hasData('_suppressClose')) {
+                            element.model.expanded = false;
+                            DOCUMENT.refreshItags();
+                        }
+                    }, DELAY_BLURCLOSE);
+                });
             },
 
            /**
@@ -266,6 +280,7 @@ console.warn(e);
             * @since 0.0.1
             */
             sync: function() {
+console.warn('syncing i-select');
                 // inside sync, YOU CANNOT change attributes which are part of `attrs` !!!
                 // those actions will be ignored.
 
@@ -322,7 +337,7 @@ console.warn(e);
                 }
 
                 // set the items:
-                itemsContainer.setHTML(content);
+                itemsContainer.setHTML(content, true);
             }
         });
 
