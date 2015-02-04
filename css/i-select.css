@@ -30,6 +30,17 @@ i-select:not(.itag-rendered) * {
 }
 /* ================================= */
 
+i-select {
+    margin: 0;
+    display: inline-block;
+    *display: inline; /*IE 6/7*/
+    zoom: 1;
+    position: relative;
+    vertical-align: middle;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 i-select >div {
     position: relative;
@@ -51,7 +62,22 @@ i-select >div.i-select-show {
     opacity: 1;
 }
 
-i-select >button.pure-button {
+
+
+i-select.pure-button-primary,
+i-select.pure-button-selected {
+    background-color: inherit;
+    color: inherit;
+}
+i-select.pure-button-primary >button,
+i-select.pure-button-focussed >button {
+    background-color: rgb(0, 120, 231);
+    color: #fff;
+}
+
+/*csslint outline-none:false*/
+
+i-select >button {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -59,17 +85,120 @@ i-select >button.pure-button {
     -ms-user-select: none;
     user-select: none;
     position: relative;
-    padding-right: 1.45em;
-    padding-left: 0;
+    padding: 0.5em 0;
     max-width: 8em;
+    color: inherit; /* 1 */
+    font: inherit; /* 2 */
+    margin: 0; /* 3 */
+    overflow: visible;
+    text-transform: none;
+    -webkit-appearance: button; /* 2 */
+    line-height: normal;
+    white-space: nowrap;
+    vertical-align: baseline;
+    text-align: center;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-family: inherit;
+    font-size: 100%;
+    color: #444; /* rgba not supported (IE 8) */
+    color: rgba(0, 0, 0, 0.80); /* rgba supported */
+    border: 1px solid #999;  /*IE 6/7/8*/
+    border: none rgba(0, 0, 0, 0);  /*IE9 + everything else*/
+    background-color: #E6E6E6;
+    text-decoration: none;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
+}
+
+
+i-select.pure-button-hover >button,
+i-select >button.pure-button:hover,
+i-select >button.pure-button:focus {
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#1a000000',GradientType=0);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
+    background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
+    background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.6) inset;
+}
+i-select >button:focus {
+    outline: 0;
+}
+i-select.pure-button-active >button,
+i-select >button:active {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.4) inset, 0 0 6px rgba(0,0,0, 0.2) inset;
+}
+
+i-select.pure-button-disabled >button,
+i-select[disabled] >button,
+i-select.pure-button-disabled >button:active,
+i-select[disabled] >button:active,
+i-select.pure-button-disabled.pure-button-active >button,
+i-select.pure-button-active[disabled] >button,
+i-select.pure-button-disabled >button:focus,
+i-select[disabled] >button:focus,
+i-select.pure-button-disabled.focussed >button,
+i-select.focussed[disabled] >button,
+i-select.pure-button-disabled >button:hover,
+i-select[disabled] >button:hover {
+    border: none;
+    background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+    filter: alpha(opacity=40);
+    -khtml-opacity: 0.40;
+    -moz-opacity: 0.40;
+    opacity: 0.40;
+    cursor: not-allowed;
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
+    cursor: default;
+}
+
+i-select.pure-button-rounded >button {
+    border-radius: 0.3em;
+}
+
+i-select.pure-button-heavyrounded >button {
+    border-radius: 0.5em;
+}
+
+i-select.pure-button-oval >button {
+    border-radius: 50%;
+}
+
+i-select.pure-button-halfoval >button {
+    border-radius: 25%;
+}
+
+.pure-group i-button >button {
+    margin: 0.35em 0;
+}
+
+i-select.pure-button-hidden {
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    z-index: -9;
+}
+
+i-select >button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
 }
 
 i-select >button div.btntext {
-    margin: 0 0.25em 0 1em;
+    margin: 0 1.25em 0 1em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 8em;
+    display: block;
 }
 
 i-select >button div.pointer {
@@ -105,6 +234,7 @@ i-select ul {
 
 i-select li {
     padding: 0.25em 0.7em;
+    white-space: nowrap;
 }
 
 i-select li.focussed {
@@ -135,6 +265,7 @@ i-select li:hover {
     background-color: #B3D4FF;
 }
 
-i-select > button.pure-button-primary div.pointer {
+i-select.pure-button-focused > button div.pointer,
+i-select.pure-button-primary > button div.pointer {
     border-top: 0.5em solid #FEFEFE;
 }
