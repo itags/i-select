@@ -64,13 +64,8 @@ i-select >div.i-select-show {
 
 
 
-i-select.pure-button-primary,
-i-select.pure-button-selected {
-    background-color: inherit;
-    color: inherit;
-}
-i-select.pure-button-primary >button,
-i-select.pure-button-focussed >button {
+i-select.i-primary >button,
+i-select.i-focussed >button {
     background-color: rgb(0, 120, 231);
     color: #fff;
 }
@@ -116,9 +111,9 @@ i-select >button {
 }
 
 
-i-select.pure-button-hover >button,
-i-select >button.pure-button:hover,
-i-select >button.pure-button:focus {
+i-select.i-hover >button,
+i-select >button:hover,
+i-select >button:focus {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#1a000000',GradientType=0);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
     background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
@@ -130,22 +125,22 @@ i-select >button.pure-button:focus {
 i-select >button:focus {
     outline: 0;
 }
-i-select.pure-button-active >button,
+i-select.i-active >button,
 i-select >button:active {
     box-shadow: 0 0 0 1px rgba(0,0,0, 0.4) inset, 0 0 6px rgba(0,0,0, 0.2) inset;
 }
 
-i-select.pure-button-disabled >button,
+i-select.i-disabled >button,
 i-select[disabled] >button,
-i-select.pure-button-disabled >button:active,
+i-select.i-disabled >button:active,
 i-select[disabled] >button:active,
-i-select.pure-button-disabled.pure-button-active >button,
-i-select.pure-button-active[disabled] >button,
-i-select.pure-button-disabled >button:focus,
+i-select.i-disabled.i-active >button,
+i-select.i-active[disabled] >button,
+i-select.i-disabled >button:focus,
 i-select[disabled] >button:focus,
-i-select.pure-button-disabled.focussed >button,
+i-select.i-disabled.focussed >button,
 i-select.focussed[disabled] >button,
-i-select.pure-button-disabled >button:hover,
+i-select.i-disabled >button:hover,
 i-select[disabled] >button:hover {
     border: none;
     background-image: none;
@@ -159,27 +154,23 @@ i-select[disabled] >button:hover {
     cursor: default;
 }
 
-i-select.pure-button-rounded >button {
+i-select.i-rounded >button {
     border-radius: 0.3em;
 }
 
-i-select.pure-button-heavyrounded >button {
+i-select.i-heavyrounded >button {
     border-radius: 0.5em;
 }
 
-i-select.pure-button-oval >button {
+i-select.i-oval >button {
     border-radius: 50%;
 }
 
-i-select.pure-button-halfoval >button {
+i-select.i-halfoval >button {
     border-radius: 25%;
 }
 
-.pure-group i-button >button {
-    margin: 0.35em 0;
-}
-
-i-select.pure-button-hidden {
+i-select.i-hidden {
     opacity: 0 !important;
     position: absolute !important;
     left: -9999px !important;
@@ -265,7 +256,7 @@ i-select li:hover {
     background-color: #B3D4FF;
 }
 
-i-select.pure-button-focused > button div.pointer,
-i-select.pure-button-primary > button div.pointer {
+i-select.i-focused > button div.pointer,
+i-select.i-primary > button div.pointer {
     border-top: 0.5em solid #FEFEFE;
 }

@@ -35,11 +35,10 @@ module.exports = function (window) {
     var DEFAULT_INVALID_VALUE = 'choose',
         itagName = 'i-select',
         DOCUMENT = window.document,
+        itagCore = require('itags.core')(window),
         HIDDEN = 'itsa-hidden',
         SHOW = 'i-select-show',
-        Event, Itag;
-
-    require('itags.core')(window);
+        Event, Itag, IFormElement;
 
     if (!window.ITAGS[itagName]) {
         Event = require('event-mobile')(window);
@@ -47,6 +46,8 @@ module.exports = function (window) {
         require('focusmanager')(window);
         require('i-item')(window);
         require('i-head')(window);
+
+        IFormElement = require('i-formelement')(window);
 
         Event.before(itagName+':manualfocus', function(e) {
             // the i-select itself is unfocussable, but its button is
@@ -180,7 +181,7 @@ module.exports = function (window) {
             element.setData('i-select-value', newValue);
         });
 
-        Itag = DOCUMENT.createItag(itagName, {
+        Itag = IFormElement.subClass(itagName, {
             /*
              *
              * @property attrs
@@ -190,6 +191,7 @@ module.exports = function (window) {
             attrs: {
                 expanded: 'boolean',
                 value: 'string',
+                prop: 'string',
                 'invalid-value': 'string'
             },
 
@@ -220,8 +222,8 @@ module.exports = function (window) {
                     items[items.length] = node.getHTML();
                 });
 
-                element.setValueOnce('items', items);
-                element.setValueOnce('buttonTexts', buttonTexts);
+                element.defineWhenUndefined('items', items)
+                       .defineWhenUndefined('buttonTexts', buttonTexts);
 
                 // store its current value, so that valueChange-event can fire:
                 element.setData('i-select-value', element.model.value);
@@ -248,8 +250,7 @@ module.exports = function (window) {
                     // at the end of the eventstack: give `tapoutside` a way to set the '_suppressClose'-data when needed
                     // just async will do
                     asyncSilent(function() {
-                        // because we go async, the element might have been destroyed in the meantime
-                        if (!element.isDestroyed() && !element.hasData('_suppressClose') && !element.contains(e.sourceTarget)) {
+                        if (!element.hasData('_suppressClose') && !element.contains(e.sourceTarget)) {
                             element.model.expanded = false;
                             DOCUMENT.refreshItags();
                         }
@@ -259,8 +260,7 @@ module.exports = function (window) {
                     // at the end of the eventstack: give `blurnode` a way to set the '_suppressClose'-data when needed
                     // need a bit more time because there is time inbetween the blur vs click events
                     laterSilent(function() {
-                        // because we go async, the element might have been destroyed in the meantime
-                        if (!element.isDestroyed() && !element.hasData('_suppressClose')) {
+                        if (!element.hasData('_suppressClose')) {
                             element.model.expanded = false;
                             DOCUMENT.refreshItags();
                         }
@@ -341,7 +341,9 @@ console.warn('syncing i-select');
             }
         });
 
-        Itag.setItagDirectEventResponse(['keypress', 'keydown']);
+        itagCore.setDirectEventResponse(Itag, ['keypress', 'keydown']);
+
+        window.ITAGS[itagName] = Itag;
     }
 
     return window.ITAGS[itagName];
