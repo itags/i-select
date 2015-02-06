@@ -60,7 +60,7 @@ module.exports = function (window) {
             element.itagReady().then(
                 function() {
                     var button = element.getElement('button');
-                    button && button.focus(true);
+                    button && button.focus(true, true);
                 }
             );
         });
