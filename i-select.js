@@ -191,7 +191,7 @@ module.exports = function (window) {
             attrs: {
                 expanded: 'boolean',
                 value: 'string',
-                prop: 'string',
+                'i-prop': 'string',
                 'invalid-value': 'string'
             },
 
@@ -209,7 +209,8 @@ module.exports = function (window) {
             */
             init: function() {
                 var element = this,
-                    itemNodes = element.getAll('>i-item'),
+                    designNode = element.getDesignNode(),
+                    itemNodes = designNode.getAll('>i-item'),
                     items = [],
                     buttonTexts = [],
                     content;
