@@ -145,10 +145,10 @@ i-select[disabled] >button:hover {
     border: none;
     background-image: none;
     filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-    filter: alpha(opacity=40);
-    -khtml-opacity: 0.40;
-    -moz-opacity: 0.40;
-    opacity: 0.40;
+    filter: alpha(opacity=60);
+    -khtml-opacity: 0.60;
+    -moz-opacity: 0.60;
+    opacity: 0.60;
     cursor: not-allowed;
     box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
     cursor: default;
@@ -199,6 +199,14 @@ i-select >button div.pointer {
     right: 0.25em;
     position: absolute;
     bottom: 0.2em;
+}
+
+i-select >button.i-nonexpandable div.btntext {
+    margin: 0 1em;
+}
+
+i-select >button.i-nonexpandable div.pointer {
+    visibility: hidden;
 }
 
 i-select >div >div {

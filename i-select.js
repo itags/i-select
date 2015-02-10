@@ -44,8 +44,6 @@ module.exports = function (window) {
         Event = require('event-mobile')(window);
         require('event-dom/extra/blurnode.js')(window);
         require('focusmanager')(window);
-        require('i-item')(window);
-        require('i-head')(window);
 
         IFormElement = require('i-formelement')(window);
 
@@ -190,6 +188,7 @@ module.exports = function (window) {
             */
             attrs: {
                 expanded: 'boolean',
+                disabled: 'boolean',
                 value: 'string',
                 'i-prop': 'string',
                 'invalid-value': 'string'
@@ -210,17 +209,16 @@ module.exports = function (window) {
             init: function() {
                 var element = this,
                     designNode = element.getDesignNode(),
-                    itemNodes = designNode.getAll('>i-item'),
+                    itemNodes = designNode.getAll('>span'),
                     items = [],
                     buttonTexts = [],
                     content;
                 itemNodes.forEach(function(node, i) {
-                    var header = node.getElement('i-head');
+                    var header = node.getElement('span[is="button"]');
                     if (header) {
                         buttonTexts[i] = header.getHTML();
-                        header.remove(true);
                     }
-                    items[items.length] = node.getHTML();
+                    items[items.length] = node.getHTML(header);
                 });
 
                 element.defineWhenUndefined('items', items)
@@ -282,7 +280,6 @@ module.exports = function (window) {
             * @since 0.0.1
             */
             sync: function() {
-console.warn('syncing i-select');
                 // inside sync, YOU CANNOT change attributes which are part of `attrs` !!!
                 // those actions will be ignored.
 
@@ -292,7 +289,7 @@ console.warn('syncing i-select');
                 // async actions well !!!
                 var element = this,
                     model = element.model,
-                    items = model.items,
+                    items = model.items || [],
                     buttonTexts = model.buttonTexts,
                     value = model.value,
                     item, content, buttonText, len, i, markValue,
@@ -311,11 +308,12 @@ console.warn('syncing i-select');
 
                 // rebuild the button:
                 button = element.getElement('button');
+                button.toggleClass('i-nonexpandable', (len<2));
                 button.getElement('div.btntext').setHTML(buttonText);
 
                 container = element.getElement('>div');
 
-                if (model.expanded) {
+                if (model.expanded && !model.disabled && (len>1)) {
                     hiddenTimer = container.getData('_hiddenTimer');
                     hiddenTimer && hiddenTimer.cancel();
                     container.setClass(SHOW);

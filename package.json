@@ -39,9 +39,7 @@
         "utils": "itsa/utils",
         "css": "itsa/css",
         "itags.core": "itags/core",
-        "i-formelement": "itags/i-formelement",
-        "i-head": "itags/i-head",
-        "i-item": "itags/i-item"
+        "i-formelement": "itags/i-formelement"
     },
     "devDependencies": {
         "chai": "^1.9.1",
