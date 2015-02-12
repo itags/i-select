@@ -70,6 +70,11 @@ module.exports = function (window) {
             }
         }, 'i-select > button');
 
+        Event.before('tap', function(e) {
+            // prevent nested focusmanager (parent) to refocus on the button:
+            e._noFocus = true;
+        }, 'i-select > button');
+
         Event.after(['tap', 'keydown'], function(e) {
             var element = e.target.getParent(),
                 e_type = e.type,
@@ -101,8 +106,8 @@ module.exports = function (window) {
                     laterSilent(function() {
                         element.removeData('_suppressClose');
                     }, SUPPRESS_DELAY);
-                    ulNode = element.getElement('ul[fm-manage]');
-                    ulNode && ulNode.focus(true);
+                    // ulNode = element.getElement('ul[fm-manage]');
+                    // ulNode && ulNode.focus(true);
                 }
             }
         }, 'i-select > button');
@@ -156,7 +161,6 @@ module.exports = function (window) {
                 markValue;
             if (prevValue!==newValue) {
                 markValue = newValue - 1;
-
                 /**
                 * Emitted when a the i-select changes its value
                 *
