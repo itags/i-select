@@ -24,6 +24,9 @@
         "i-select"
     ],
     "main": "i-select.js",
+    "directories": {
+        "css": "./css"
+    },
     "browserify": {
         "transform": ["cssify"]
     },
@@ -31,13 +34,6 @@
         "node": "*"
     },
     "dependencies": {
-        "polyfill": "itsa/polyfill",
-        "focusmanager": "itsa/focusmanager",
-        "event-mobile": "itsa/event-mobile",
-        "event-dom": "itsa/event-dom",
-        "js-ext": "itsa/js-ext",
-        "utils": "itsa/utils",
-        "css": "itsa/css",
         "itags.core": "itags/core",
         "i-formelement": "itags/i-formelement"
     },

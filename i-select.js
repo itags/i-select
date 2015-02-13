@@ -18,15 +18,9 @@
 * value, expanded, invalid-value
 */
 
-require('polyfill/polyfill-base.js');
-require('js-ext/lib/string.js');
-require('css');
 require('./css/i-select.css');
 
-var utils = require('utils'),
-    asyncSilent = utils.asyncSilent,
-    laterSilent = utils.laterSilent,
-    DELAY_BLURCLOSE = 125,
+var DELAY_BLURCLOSE = 125,
     SUPPRESS_DELAY = 175;
 
 module.exports = function (window) {
@@ -34,16 +28,17 @@ module.exports = function (window) {
 
     var DEFAULT_INVALID_VALUE = 'choose',
         itagName = 'i-select',
-        DOCUMENT = window.document,
         itagCore = require('itags.core')(window),
+        DOCUMENT = window.document,
+        ITSA = window.ITSA,
+        asyncSilent = ITSA.asyncSilent,
+        laterSilent = ITSA.laterSilent,
+        Event = ITSA.Event,
         HIDDEN = 'itsa-hidden',
         SHOW = 'i-select-show',
-        Event, Itag, IFormElement;
+        Itag, IFormElement;
 
     if (!window.ITAGS[itagName]) {
-        Event = require('event-mobile')(window);
-        require('event-dom/extra/blurnode.js')(window);
-        require('focusmanager')(window);
 
         IFormElement = require('i-formelement')(window);
 
@@ -195,7 +190,8 @@ module.exports = function (window) {
                 disabled: 'boolean',
                 value: 'string',
                 'i-prop': 'string',
-                'invalid-value': 'string'
+                'invalid-value': 'string',
+                'reset-value': 'string'
             },
 
            /**
@@ -213,9 +209,10 @@ module.exports = function (window) {
             init: function() {
                 var element = this,
                     designNode = element.getDesignNode(),
-                    itemNodes = designNode.getAll('>span'),
+                    itemNodes = designNode.getAll('>option'),
                     items = [],
                     buttonTexts = [],
+                    value = element.model.value,
                     content;
                 itemNodes.forEach(function(node, i) {
                     var header = node.getElement('span[is="button"]');
@@ -229,7 +226,9 @@ module.exports = function (window) {
                        .defineWhenUndefined('buttonTexts', buttonTexts);
 
                 // store its current value, so that valueChange-event can fire:
-                element.setData('i-select-value', element.model.value);
+                element.setData('i-select-value', value);
+                // set the reset-value to the inital-value in case `reset-value` was not present
+                element.defineWhenUndefined('reset-value', value);
 
                 // building the template of the itag:
                 content = '<button><div class="pointer"></div><div class="btntext"></div></button>';
@@ -242,16 +241,27 @@ module.exports = function (window) {
                              '</div>'+
                            '</div>';
 
+                element.cleanupEvents();
                 element.setupEvents();
                 // set the content:
                 element.setHTML(content);
             },
 
+            cleanupEvents: function() {
+                this._outsideListener && this._outsideListener.detach();
+            },
+
+            reset: function() {
+                var model = this.model;
+                model.value = model['reset-value'];
+                // no need to call `refreshItags` --> the reset()-method doesn't come out of the blue
+                // so, the eventsystem will refresh it afterwards
+            },
+
             setupEvents: function() {
                 var element = this;
-                Event.after('tapoutside', function(e) {
-                    // at the end of the eventstack: give `tapoutside` a way to set the '_suppressClose'-data when needed
-                    // just async will do
+                // because the tapoutside event is not set through element.salfAfter, we need to detach the event when needed:
+                element._outsideListener = Event.after('tapoutside', function(e) {
                     asyncSilent(function() {
                         if (!element.hasData('_suppressClose') && !element.contains(e.sourceTarget)) {
                             element.model.expanded = false;
@@ -317,7 +327,7 @@ module.exports = function (window) {
 
                 container = element.getElement('>div');
 
-                if (model.expanded && !model.disabled && (len>1)) {
+                if (model.expanded && !model.disabled && !element.hasClass('i-disabled') && (len>1)) {
                     hiddenTimer = container.getData('_hiddenTimer');
                     hiddenTimer && hiddenTimer.cancel();
                     container.setClass(SHOW);
@@ -341,6 +351,10 @@ module.exports = function (window) {
 
                 // set the items:
                 itemsContainer.setHTML(content, true);
+            },
+
+            destroy: function() {
+                this.cleanupEvents();
             }
         });
 

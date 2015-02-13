@@ -110,7 +110,7 @@ i-select >button {
     box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
 }
 
-
+/* need .pure-button-active for it gets set when "enter-pressed" on button */
 i-select.i-hover >button,
 i-select >button:hover,
 i-select >button:focus {
@@ -126,22 +126,25 @@ i-select >button:focus {
     outline: 0;
 }
 i-select.i-active >button,
+i-select >button.pure-button-active, /* need .pure-button-active for it gets set when "enter-pressed" on button */
 i-select >button:active {
     box-shadow: 0 0 0 1px rgba(0,0,0, 0.4) inset, 0 0 6px rgba(0,0,0, 0.2) inset;
 }
 
 i-select.i-disabled >button,
-i-select[disabled] >button,
+i-select[disabled="true"] >button,
 i-select.i-disabled >button:active,
-i-select[disabled] >button:active,
+i-select[disabled="true"] >button:active,
+i-select.i-disabled >button.pure-button-active, /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select[disabled="true"] >button.pure-button-active,
 i-select.i-disabled.i-active >button,
-i-select.i-active[disabled] >button,
+i-select.i-active[disabled="true"] >button,
 i-select.i-disabled >button:focus,
-i-select[disabled] >button:focus,
+i-select[disabled="true"] >button:focus,
 i-select.i-disabled.focussed >button,
-i-select.focussed[disabled] >button,
+i-select.focussed[disabled="true"] >button,
 i-select.i-disabled >button:hover,
-i-select[disabled] >button:hover {
+i-select[disabled="true"] >button:hover {
     border: none;
     background-image: none;
     filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
