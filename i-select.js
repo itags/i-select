@@ -101,8 +101,6 @@ module.exports = function (window) {
                     laterSilent(function() {
                         element.removeData('_suppressClose');
                     }, SUPPRESS_DELAY);
-                    // ulNode = element.getElement('ul[fm-manage]');
-                    // ulNode && ulNode.focus(true);
                 }
             }
         }, 'i-select > button');
@@ -223,12 +221,12 @@ module.exports = function (window) {
                 });
 
                 element.defineWhenUndefined('items', items)
-                       .defineWhenUndefined('buttonTexts', buttonTexts);
+                       .defineWhenUndefined('buttonTexts', buttonTexts)
+                        // set the reset-value to the inital-value in case `reset-value` was not present
+                       .defineWhenUndefined('reset-value', value);
 
                 // store its current value, so that valueChange-event can fire:
                 element.setData('i-select-value', value);
-                // set the reset-value to the inital-value in case `reset-value` was not present
-                element.defineWhenUndefined('reset-value', value);
 
                 // building the template of the itag:
                 content = '<button><div class="pointer"></div><div class="btntext"></div></button>';
@@ -249,6 +247,11 @@ module.exports = function (window) {
 
             cleanupEvents: function() {
                 this._outsideListener && this._outsideListener.detach();
+            },
+
+            currentToReset: function() {
+                var model = this.model;
+                model['reset-value'] = model.value;
             },
 
             reset: function() {
