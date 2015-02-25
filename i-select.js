@@ -198,9 +198,7 @@ module.exports = function (window) {
             *
             * Syncs the new vnode's childNodes with the dom.
             *
-            * @method _setChildNodes
-            * @param newVChildNodes {Array} array with vnodes which represent the new childNodes
-            * @private
+            * @method init
             * @chainable
             * @since 0.0.1
             */
@@ -210,8 +208,7 @@ module.exports = function (window) {
                     itemNodes = designNode.getAll('>option'),
                     items = [],
                     buttonTexts = [],
-                    value = element.model.value,
-                    content;
+                    value = element.model.value;
                 itemNodes.forEach(function(node, i) {
                     var header = node.getElement('span[is="button"]');
                     if (header) {
@@ -228,6 +225,23 @@ module.exports = function (window) {
                 // store its current value, so that valueChange-event can fire:
                 element.setData('i-select-value', value);
 
+                element.cleanupEvents();
+                element.setupEvents();
+            },
+
+           /**
+            * Redefines the childNodes of both the vnode as well as its related dom-node. The new
+            * definition replaces any previous nodes. (without touching unmodified nodes).
+            *
+            * Syncs the new vnode's childNodes with the dom.
+            *
+            * @method render
+            * @chainable
+            * @since 0.0.1
+            */
+            render: function() {
+                var element = this,
+                    content;
                 // building the template of the itag:
                 content = '<button><div class="pointer"></div><div class="btntext"></div></button>';
                 // first: outerdiv which will be relative positioned
@@ -238,9 +252,6 @@ module.exports = function (window) {
                                '<ul fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
                              '</div>'+
                            '</div>';
-
-                element.cleanupEvents();
-                element.setupEvents();
                 // set the content:
                 element.setHTML(content);
             },
