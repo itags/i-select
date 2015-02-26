@@ -83,17 +83,17 @@ module.exports = function (window) {
                 else {
                     inactive = element.hasData('_suppressClose');
                     if (inactive) {
-                        console.warn('not reacting to '+e_type+'-event: button is in pauzed state');
+                        console.info('not reacting to '+e_type+'-event: button is in pauzed state');
                         return;
                     }
                     model.expanded = !model.expanded;
                     if (!model.expanded) {
-                        liNode = element.getElement('ul[fm-manage] >li[fm-defaultitem]');
+                        liNode = element.getElement('ul[plugin-fm="true"] >li[fm-defaultitem]');
                         liNode && liNode.focus(true);
                     }
                 }
                 if (model.expanded) {
-                    ulNode = element.getElement('ul[fm-manage]');
+                    ulNode = element.getElement('ul[plugin-fm="true"]');
                     ulNode && ulNode.focus(true);
                 }
                 if (model.expanded || (e_type==='tap')) {
@@ -116,7 +116,7 @@ module.exports = function (window) {
                 if (model.expanded) {
                     inactive = element.hasData('_suppressClose');
                     if (inactive) {
-                        console.warn('not reacting to '+e_type+'-event: button is in pauzed state');
+                        console.info('not reacting to '+e_type+'-event: button is in pauzed state');
                         return;
                     }
                     model = element.model;
@@ -129,7 +129,7 @@ module.exports = function (window) {
                         laterSilent(function() {
                             element.removeData('_suppressClose');
                         }, SUPPRESS_DELAY);
-                        ulNode = element.getElement('ul[fm-manage]');
+                        ulNode = element.getElement('ul[plugin-fm="true"]');
                         ulNode && ulNode.focus(true);
                     }
                     // prevent that the focus will be reset to the focusmanager
@@ -140,7 +140,7 @@ module.exports = function (window) {
                     });
                 }
             }
-        }, 'i-select ul[fm-manage] > li');
+        }, 'i-select ul[plugin-fm="true"] > li');
 
         Event.defineEvent(itagName+':valuechange')
              .unPreventable()
@@ -249,7 +249,7 @@ module.exports = function (window) {
                 // also: hide the container by default --> updateUI could make it shown
                 content += '<div class="itsa-hidden">' +
                              '<div>'+
-                               '<ul fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
+                               '<ul plugin-fm="true" fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
                              '</div>'+
                            '</div>';
                 // set the content:
@@ -356,7 +356,7 @@ module.exports = function (window) {
                     container.setData('_hiddenTimer', hiddenTimer);
                 }
 
-                itemsContainer = element.getElement('ul[fm-manage]');
+                itemsContainer = element.getElement('ul[plugin-fm="true"]');
                 content = '';
                 for (i=0; i<len; i++) {
                     item = items[i];
