@@ -42,7 +42,7 @@ i-select {
     box-sizing: border-box;
 }
 
-i-select >div {
+i-select >span {
     position: relative;
     z-index: 2;
     -webkit-transition: opacity 0.1s;
@@ -53,7 +53,7 @@ i-select >div {
     opacity: 0;
 }
 
-i-select >div.i-select-show {
+i-select >span.i-select-show {
     -webkit-transition: opacity 0.2s;
     -moz-transition: opacity 0.2s;
     -ms-transition: opacity 0.2s;
@@ -62,7 +62,15 @@ i-select >div.i-select-show {
     opacity: 1;
 }
 
-
+i-select >button >span,
+i-select >span,
+i-select >span >span,
+i-select >span >span >span {
+    display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 i-select.i-primary >button,
 i-select.i-focussed >button {
@@ -120,15 +128,26 @@ i-select >button:focus {
     background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
     background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
     background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
-    box-shadow: 0 0 0 1px rgba(0,0,0, 0.6) inset;
 }
 i-select >button:focus {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.6) inset;
     outline: 0;
 }
-i-select.i-active >button,
-i-select >button.pure-button-active, /* need .pure-button-active for it gets set when "enter-pressed" on button */
-i-select >button:active {
-    box-shadow: 0 0 0 1px rgba(0,0,0, 0.4) inset, 0 0 6px rgba(0,0,0, 0.2) inset;
+i-select.i-active.i-hover >button,
+i-select.i-active >button:hover,
+i-select.i-active.i-hover >button:focus,
+i-select.i-active >button:hover:focus,
+i-select.i-hover >button.pure-button-active,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:hover,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select.i-hover >button.pure-button-active:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:hover:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select.i-hover >button:active,
+i-select >button:hover:active,
+i-select.i-hover >button:focus:active,
+i-select >button:hover:focus:active {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.8) inset, 0 0 6px rgba(0,0,0, 0.4) inset;
 }
 
 i-select.i-disabled >button,
@@ -186,7 +205,7 @@ i-select >button::-moz-focus-inner {
   padding: 0;
 }
 
-i-select >button div.btntext {
+i-select >button >span.btntext {
     margin: 0 1.25em 0 1em;
     white-space: nowrap;
     overflow: hidden;
@@ -195,7 +214,7 @@ i-select >button div.btntext {
     display: block;
 }
 
-i-select >button div.pointer {
+i-select >button >span.pointer {
     border-left: 0.4em solid rgba(0, 0, 0, 0);
     border-right: 0.4em solid rgba(0, 0, 0, 0);
     border-top: 0.5em solid #000;
@@ -204,15 +223,15 @@ i-select >button div.pointer {
     bottom: 0.2em;
 }
 
-i-select >button.i-nonexpandable div.btntext {
+i-select >button.i-nonexpandable span.btntext {
     margin: 0 1em;
 }
 
-i-select >button.i-nonexpandable div.pointer {
+i-select >button.i-nonexpandable span.pointer {
     visibility: hidden;
 }
 
-i-select >div >div {
+i-select >span >span {
     position: absolute;
     left: 0;
     top: 0;
@@ -227,30 +246,30 @@ i-select >div >div {
     box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
 }
 
-i-select ul {
+i-select >span >span >span {
     font-size: 1.2em;
     padding: 0 0 0.3em;
     list-style: none;
     margin: 0;
 }
 
-i-select li {
+i-select option {
     padding: 0.25em 0.7em;
     white-space: nowrap;
 }
 
-i-select li.focussed {
+i-select option.focussed {
     background-color: #B3D4FF;
 }
 
-i-select li.selected:before {
+i-select option.selected:before {
     content: '*';
     margin-left: -0.7em;
     padding-right: 0.25em;
 }
 
-i-select li:before,
-i-select li:after {
+i-select option:before,
+i-select option:after {
     content: '';
     padding: 0;
     margin: 0;
@@ -258,16 +277,16 @@ i-select li:after {
 
 /* color specification:; */
 
-i-select >div >div {
+i-select >span >span {
     background-color: #FFF;
     border-color: #000;
 }
 
-i-select li:hover {
+i-select option:hover {
     background-color: #B3D4FF;
 }
 
-i-select.i-focused > button div.pointer,
-i-select.i-primary > button div.pointer {
+i-select.i-focused > button span.pointer,
+i-select.i-primary > button span.pointer {
     border-top: 0.5em solid #FEFEFE;
 }

@@ -88,12 +88,12 @@ module.exports = function (window) {
                     }
                     model.expanded = !model.expanded;
                     if (!model.expanded) {
-                        liNode = element.getElement('ul[plugin-fm="true"] >li[fm-defaultitem]');
+                        liNode = element.getElement('span[plugin-fm="true"] >option[fm-defaultitem]');
                         liNode && liNode.focus(true);
                     }
                 }
                 if (model.expanded) {
-                    ulNode = element.getElement('ul[plugin-fm="true"]');
+                    ulNode = element.getElement('span[plugin-fm="true"]');
                     ulNode && ulNode.focus(true);
                 }
                 if (model.expanded || (e_type==='tap')) {
@@ -121,7 +121,7 @@ module.exports = function (window) {
                     }
                     model = element.model;
                     ulNode = liNode.getParent();
-                    index = ulNode.getAll('li').indexOf(liNode);
+                    index = ulNode.getAll('option').indexOf(liNode);
                     model.expanded = false;
                     model.value = index+1;
                     if (e_type==='tap') {
@@ -129,7 +129,7 @@ module.exports = function (window) {
                         laterSilent(function() {
                             element.removeData('_suppressClose');
                         }, SUPPRESS_DELAY);
-                        ulNode = element.getElement('ul[plugin-fm="true"]');
+                        ulNode = element.getElement('span[plugin-fm="true"]');
                         ulNode && ulNode.focus(true);
                     }
                     // prevent that the focus will be reset to the focusmanager
@@ -140,7 +140,7 @@ module.exports = function (window) {
                     });
                 }
             }
-        }, 'i-select ul[plugin-fm="true"] > li');
+        }, 'i-select span[plugin-fm="true"] > option');
 
         Event.defineEvent(itagName+':valuechange')
              .unPreventable()
@@ -204,7 +204,7 @@ module.exports = function (window) {
             */
             init: function() {
                 var element = this,
-                    designNode = element.getDesignNode(),
+                    designNode = element.getItagContainer(),
                     itemNodes = designNode.getAll('>option'),
                     items = [],
                     buttonTexts = [],
@@ -243,15 +243,15 @@ module.exports = function (window) {
                 var element = this,
                     content;
                 // building the template of the itag:
-                content = '<button><div class="pointer"></div><div class="btntext"></div></button>';
+                content = '<button><span class="pointer"></span><span class="btntext"></span></button>';
                 // first: outerdiv which will be relative positioned
                 // next: innerdiv which will be absolute positioned
                 // also: hide the container by default --> updateUI could make it shown
-                content += '<div class="itsa-hidden">' +
-                             '<div>'+
-                               '<ul plugin-fm="true" fm-manage="li" fm-keyup="38" fm-keydown="40" fm-noloop="true"></ul>';
-                             '</div>'+
-                           '</div>';
+                content += '<span class="itsa-hidden">' +
+                             '<span>'+
+                               '<span plugin-fm="true" fm-manage="option" fm-keyup="38" fm-keydown="40" fm-noloop="true"></span>';
+                             '</span>'+
+                           '</span>';
                 // set the content:
                 element.setHTML(content);
             },
@@ -337,9 +337,9 @@ module.exports = function (window) {
                 // rebuild the button:
                 button = element.getElement('button');
                 button.toggleClass('i-nonexpandable', (len<2));
-                button.getElement('div.btntext').setHTML(buttonText);
+                button.getElement('span.btntext').setHTML(buttonText);
 
-                container = element.getElement('>div');
+                container = element.getElement('>span');
 
                 if (model.expanded && !model.disabled && !element.hasClass('i-disabled') && (len>1)) {
                     hiddenTimer = container.getData('_hiddenTimer');
@@ -356,11 +356,11 @@ module.exports = function (window) {
                     container.setData('_hiddenTimer', hiddenTimer);
                 }
 
-                itemsContainer = element.getElement('ul[plugin-fm="true"]');
+                itemsContainer = element.getElement('span[plugin-fm="true"]');
                 content = '';
                 for (i=0; i<len; i++) {
                     item = items[i];
-                    content += '<li'+((i===markValue) ? ' class="selected" fm-defaultitem="true"' : '')+'>'+item+'</li>';
+                    content += '<option'+((i===markValue) ? ' class="selected" fm-defaultitem="true"' : '')+'>'+item+'</option>';
                 }
 
                 // set the items:
