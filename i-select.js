@@ -26,13 +26,13 @@ var DELAY_BLURCLOSE = 125,
 module.exports = function (window) {
     "use strict";
 
+    require('itags.core')(window);
+
     var DEFAULT_INVALID_VALUE = 'choose',
         itagName = 'i-select',
-        itagCore = require('itags.core')(window),
-        DOCUMENT = window.document,
         ITSA = window.ITSA,
-        asyncSilent = ITSA.asyncSilent,
-        laterSilent = ITSA.laterSilent,
+        async = ITSA.async,
+        later = ITSA.later,
         Event = ITSA.Event,
         HIDDEN = 'itsa-hidden',
         SHOW = 'i-select-show',
@@ -53,7 +53,7 @@ module.exports = function (window) {
             element.itagReady().then(
                 function() {
                     var button = element.getElement('button');
-                    button && button.focus(true, true);
+                    button && button.focus(true);
                 }
             );
         });
@@ -89,16 +89,16 @@ module.exports = function (window) {
                     model.expanded = !model.expanded;
                     if (!model.expanded) {
                         liNode = element.getElement('span[plugin-fm="true"] >option[fm-defaultitem]');
-                        liNode && liNode.focus(true);
+                        liNode && liNode.focus();
                     }
                 }
                 if (model.expanded) {
                     ulNode = element.getElement('span[plugin-fm="true"]');
-                    ulNode && ulNode.focus(true);
+                    ulNode && ulNode.focus();
                 }
                 if (model.expanded || (e_type==='tap')) {
                     element.setData('_suppressClose', true);
-                    laterSilent(function() {
+                    later(function() {
                         element.removeData('_suppressClose');
                     }, SUPPRESS_DELAY);
                 }
@@ -126,25 +126,23 @@ module.exports = function (window) {
                     model.value = index+1;
                     if (e_type==='tap') {
                         element.setData('_suppressClose', true);
-                        laterSilent(function() {
+                        later(function() {
                             element.removeData('_suppressClose');
                         }, SUPPRESS_DELAY);
                         ulNode = element.getElement('span[plugin-fm="true"]');
-                        ulNode && ulNode.focus(true);
+                        ulNode && ulNode.focus();
                     }
                     // prevent that the focus will be reset to the focusmanager
                     // when re-synced --> we want the focus on the button:
                     ulNode.removeClass('focussed');
-                    asyncSilent(function() {
-                        element.focus(true);
+                    async(function() {
+                        element.focus();
                     });
                 }
             }
         }, 'i-select span[plugin-fm="true"] > option');
 
-        Event.defineEvent(itagName+':valuechange')
-             .unPreventable()
-             .noRender();
+        Event.defineEvent(itagName+':valuechange').unPreventable();
 
         Event.after(itagName+':change', function(e) {
             var element = e.target,
@@ -268,28 +266,24 @@ module.exports = function (window) {
             reset: function() {
                 var model = this.model;
                 model.value = model['reset-value'];
-                // no need to call `refreshItags` --> the reset()-method doesn't come out of the blue
-                // so, the eventsystem will refresh it afterwards
             },
 
             setupEvents: function() {
                 var element = this;
                 // because the tapoutside event is not set through element.salfAfter, we need to detach the event when needed:
                 element._outsideListener = Event.after('tapoutside', function(e) {
-                    asyncSilent(function() {
+                    async(function() {
                         if (!element.hasData('_suppressClose') && !element.contains(e.sourceTarget)) {
                             element.model.expanded = false;
-                            DOCUMENT.refreshItags();
                         }
                     });
                 }, 'i-select');
                 element.selfAfter('blurnode', function() {
                     // at the end of the eventstack: give `blurnode` a way to set the '_suppressClose'-data when needed
                     // need a bit more time because there is time inbetween the blur vs click events
-                    laterSilent(function() {
+                    later(function() {
                         if (!element.hasData('_suppressClose')) {
                             element.model.expanded = false;
-                            DOCUMENT.refreshItags();
                         }
                     }, DELAY_BLURCLOSE);
                 });
@@ -350,7 +344,7 @@ module.exports = function (window) {
                 else {
                     container.removeClass(SHOW);
                     // hide the layer completely: we need to access anything underneath:
-                    hiddenTimer = laterSilent(function() {
+                    hiddenTimer = later(function() {
                         container.setClass(HIDDEN);
                     }, 110);
                     container.setData('_hiddenTimer', hiddenTimer);
@@ -371,8 +365,6 @@ module.exports = function (window) {
                 this.cleanupEvents();
             }
         });
-
-        itagCore.setDirectEventResponse(Itag, ['keypress', 'keydown']);
 
         window.ITAGS[itagName] = Itag;
     }
