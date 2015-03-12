@@ -278,15 +278,20 @@ module.exports = function (window) {
                         }
                     });
                 }, 'i-select');
-                element.selfAfter('blurnode', function() {
-                    // at the end of the eventstack: give `blurnode` a way to set the '_suppressClose'-data when needed
-                    // need a bit more time because there is time inbetween the blur vs click events
-                    later(function() {
-                        if (!element.hasData('_suppressClose')) {
-                            element.model.expanded = false;
+                element.selfAfter(
+                    'blurnode',
+                    function(e) {
+                        if (e.target===element) {
+                            // at the end of the eventstack: give `blurnode` a way to set the '_suppressClose'-data when needed
+                            // need a bit more time because there is time inbetween the blur vs click events
+                            later(function() {
+                                if (!element.hasData('_suppressClose')) {
+                                    element.model.expanded = false;
+                                }
+                            }, DELAY_BLURCLOSE);
                         }
-                    }, DELAY_BLURCLOSE);
-                });
+                    }
+                );
             },
 
            /**
