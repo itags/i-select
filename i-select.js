@@ -123,7 +123,7 @@ module.exports = function (window) {
                     ulNode = liNode.getParent();
                     index = ulNode.getAll('option').indexOf(liNode);
                     model.expanded = false;
-                    model.value = index+1;
+                    model.value = index;
                     if (e_type==='tap') {
                         element.setData('_suppressClose', true);
                         later(function() {
@@ -148,10 +148,8 @@ module.exports = function (window) {
             var element = e.target,
                 prevValue = element.getData('i-select-value'),
                 model = element.model,
-                newValue = model.value,
-                markValue;
+                newValue = model.value;
             if (prevValue!==newValue) {
-                markValue = newValue - 1;
                 /**
                 * Emitted when a the i-select changes its value
                 *
@@ -167,8 +165,8 @@ module.exports = function (window) {
                 element.emit('valuechange', {
                     prevValue: prevValue,
                     newValue: newValue,
-                    buttonText: model.buttonTexts[markValue] || model.items[markValue],
-                    listText: model.items[markValue]
+                    buttonText: model.buttonTexts[value] || model.items[newValue],
+                    listText: model.items[newValue]
                 });
             }
             element.setData('i-select-value', newValue);
@@ -263,6 +261,10 @@ module.exports = function (window) {
                 model['reset-value'] = model.value;
             },
 
+            getValue: function() {
+                return this.model.value;
+            },
+
             reset: function() {
                 var model = this.model;
                 model.value = model['reset-value'];
@@ -319,15 +321,14 @@ module.exports = function (window) {
                     items = model.items || [],
                     buttonTexts = model.buttonTexts,
                     value = model.value,
-                    item, content, buttonText, len, i, markValue,
+                    item, content, buttonText, len, i,
                     button, container, itemsContainer, hiddenTimer;
 
                 len = items.length;
                 (value>len) && (value=0);
-                markValue = value - 1;
 
-                if (value>0) {
-                    buttonText = buttonTexts[markValue] || items[markValue];
+                if (value>=0) {
+                    buttonText = buttonTexts[value] || items[value];
                 }
                 else {
                     buttonText = model['invalid-value'] || DEFAULT_INVALID_VALUE;
@@ -359,7 +360,7 @@ module.exports = function (window) {
                 content = '';
                 for (i=0; i<len; i++) {
                     item = items[i];
-                    content += '<option'+((i===markValue) ? ' class="selected" fm-defaultitem="true"' : '')+'>'+item+'</option>';
+                    content += '<option'+((i===value) ? ' class="selected" fm-defaultitem="true"' : '')+'>'+item+'</option>';
                 }
 
                 // set the items:
