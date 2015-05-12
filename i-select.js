@@ -165,7 +165,7 @@ module.exports = function (window) {
                 element.emit('valuechange', {
                     prevValue: prevValue,
                     newValue: newValue,
-                    buttonText: model.buttonTexts[value] || model.items[newValue],
+                    buttonText: model.buttonTexts[newValue] || model.items[newValue],
                     listText: model.items[newValue]
                 });
             }
@@ -183,6 +183,7 @@ module.exports = function (window) {
                 expanded: 'boolean',
                 disabled: 'boolean',
                 value: 'string',
+                required: 'boolean',
                 'i-prop': 'string',
                 'invalid-value': 'string',
                 'reset-value': 'string'
@@ -204,7 +205,7 @@ module.exports = function (window) {
                     itemNodes = designNode.getAll('>option'),
                     items = [],
                     buttonTexts = [],
-                    value = element.model.value;
+                    value = element.model.value || -1;
                 itemNodes.forEach(function(node, i) {
                     var header = node.getElement('span[is="button"]');
                     if (header) {
@@ -213,7 +214,8 @@ module.exports = function (window) {
                     items[items.length] = node.getHTML(header);
                 });
 
-                element.defineWhenUndefined('items', items)
+                element.defineWhenUndefined('value', value)
+                       .defineWhenUndefined('items', items)
                        .defineWhenUndefined('buttonTexts', buttonTexts)
                         // set the reset-value to the inital-value in case `reset-value` was not present
                        .defineWhenUndefined('reset-value', value);
@@ -325,7 +327,7 @@ module.exports = function (window) {
                     button, container, itemsContainer, hiddenTimer;
 
                 len = items.length;
-                (value>len) && (value=0);
+                (value>len) && (value=-1);
 
                 if (value>=0) {
                     buttonText = buttonTexts[value] || items[value];
@@ -365,6 +367,11 @@ module.exports = function (window) {
 
                 // set the items:
                 itemsContainer.setHTML(content, true);
+            },
+
+            invalid: function() {
+                var model = this.model;
+                return model.required && (model.value === -1);
             },
 
             destroy: function() {
