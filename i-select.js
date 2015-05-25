@@ -258,20 +258,6 @@ module.exports = function (window) {
                 this._outsideListener && this._outsideListener.detach();
             },
 
-            currentToReset: function() {
-                var model = this.model;
-                model['reset-value'] = model.value;
-            },
-
-            getValue: function() {
-                return this.model.value;
-            },
-
-            reset: function() {
-                var model = this.model;
-                model.value = model['reset-value'];
-            },
-
             setupEvents: function() {
                 var element = this;
                 // because the tapoutside event is not set through element.salfAfter, we need to detach the event when needed:
