@@ -1,0 +1,292 @@
+/* ======================================================================= */
+/* ======================================================================= */
+/* ======================================================================= */
+/* Definition of itag shadow-css is done by defining a `dummy` css-rule    */
+/* for the dummy-element: `itag-css` --> its property (also dummy) `i-tag` */
+/* will define which itag will be css-shadowed                             */
+/* ======================================================================= */
+itag-css {
+    i-tag: i-select;  /* set the property-value to the proper itag */
+}
+/* ======================================================================= */
+/* ======================================================================= */
+/* ======================================================================= */
+
+
+/* ================================= */
+/* set invisiblity when not rendered */
+/* ================================= */
+i-select:not(.itag-rendered) {
+    /* don't set visibility to hidden --> you cannot set a focus on those items */
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    z-index: -1;
+}
+
+i-select:not(.itag-rendered) * {
+    opacity: 0 !important;
+}
+/* ================================= */
+
+i-select {
+    margin: 0;
+    display: inline-block;
+    *display: inline; /*IE 6/7*/
+    zoom: 1;
+    position: relative;
+    vertical-align: middle;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+i-select >span {
+    position: relative;
+    z-index: 2;
+    -webkit-transition: opacity 0.1s;
+    -moz-transition: opacity 0.1s;
+    -ms-transition: opacity 0.1s;
+    -o-transition: opacity 0.1s;
+    transition: opacity 0.1s;
+    opacity: 0;
+}
+
+i-select >span.i-select-show {
+    -webkit-transition: opacity 0.2s;
+    -moz-transition: opacity 0.2s;
+    -ms-transition: opacity 0.2s;
+    -o-transition: opacity 0.2s;
+    transition: opacity 0.2s;
+    opacity: 1;
+}
+
+i-select >button >span,
+i-select >span,
+i-select >span >span,
+i-select >span >span >span {
+    display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+i-select.i-primary >button,
+i-select.i-focussed >button {
+    background-color: rgb(0, 120, 231);
+    color: #fff;
+}
+
+/*csslint outline-none:false*/
+
+i-select >button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    padding: 0.5em 0;
+    max-width: 8em;
+    color: inherit; /* 1 */
+    font: inherit; /* 2 */
+    margin: 0; /* 3 */
+    overflow: visible;
+    text-transform: none;
+    -webkit-appearance: button; /* 2 */
+    line-height: normal;
+    white-space: nowrap;
+    vertical-align: baseline;
+    text-align: center;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-family: inherit;
+    font-size: 100%;
+    color: #444; /* rgba not supported (IE 8) */
+    color: rgba(0, 0, 0, 0.80); /* rgba supported */
+    border: 1px solid #999;  /*IE 6/7/8*/
+    border: none rgba(0, 0, 0, 0);  /*IE9 + everything else*/
+    background-color: #E6E6E6;
+    text-decoration: none;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
+}
+
+/* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select.i-hover >button,
+i-select >button:hover,
+i-select >button:focus {
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#1a000000',GradientType=0);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
+    background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
+    background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+}
+i-select >button:focus {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.6) inset;
+    outline: 0;
+}
+i-select.i-active.i-hover >button,
+i-select.i-active >button:hover,
+i-select.i-active.i-hover >button:focus,
+i-select.i-active >button:hover:focus,
+i-select.i-hover >button.pure-button-active,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:hover,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select.i-hover >button.pure-button-active:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:hover:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select >button.pure-button-active:focus,  /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select.i-hover >button:active,
+i-select >button:hover:active,
+i-select.i-hover >button:focus:active,
+i-select >button:hover:focus:active {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.8) inset, 0 0 6px rgba(0,0,0, 0.4) inset;
+}
+
+i-select.i-disabled >button,
+i-select[disabled="true"] >button,
+i-select.i-disabled >button:active,
+i-select[disabled="true"] >button:active,
+i-select.i-disabled >button.pure-button-active, /* need .pure-button-active for it gets set when "enter-pressed" on button */
+i-select[disabled="true"] >button.pure-button-active,
+i-select.i-disabled.i-active >button,
+i-select.i-active[disabled="true"] >button,
+i-select.i-disabled >button:focus,
+i-select[disabled="true"] >button:focus,
+i-select.i-disabled.focussed >button,
+i-select.focussed[disabled="true"] >button,
+i-select.i-disabled >button:hover,
+i-select[disabled="true"] >button:hover {
+    border: none;
+    background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+    filter: alpha(opacity=60);
+    -khtml-opacity: 0.60;
+    -moz-opacity: 0.60;
+    opacity: 0.60;
+    cursor: not-allowed;
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset;
+    cursor: default;
+}
+
+i-select.i-rounded >button {
+    border-radius: 0.3em;
+}
+
+i-select.i-heavyrounded >button {
+    border-radius: 0.5em;
+}
+
+i-select.i-oval >button {
+    border-radius: 50%;
+}
+
+i-select.i-halfoval >button {
+    border-radius: 25%;
+}
+
+i-select.i-hidden {
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    z-index: -9;
+}
+
+i-select >button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+i-select >button >span.btntext {
+    margin: 0 1.25em 0 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 8em;
+    display: block;
+}
+
+i-select >button >span.pointer {
+    border-left: 0.4em solid rgba(0, 0, 0, 0);
+    border-right: 0.4em solid rgba(0, 0, 0, 0);
+    border-top: 0.5em solid #000;
+    right: 0.25em;
+    position: absolute;
+    bottom: 0.2em;
+}
+
+i-select >button.i-nonexpandable span.btntext {
+    margin: 0 1em;
+}
+
+i-select >button.i-nonexpandable span.pointer {
+    visibility: hidden;
+}
+
+i-select >span >span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 0.1em;
+    -webkit-border-radius: 0 0 0.3em 0.3em;
+    -moz-border-radius: 0 0 0.3em 0.3em;
+    border-radius: 0 0 0.3em 0.3em;
+    -webkit-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
+    box-shadow: 0.3em 0.3em 5px rgba(0,0,0,0.15);
+}
+
+i-select >span >span >span {
+    font-size: 1.2em;
+    padding: 0 0 0.3em;
+    list-style: none;
+    margin: 0;
+}
+
+i-select option {
+    padding: 0.25em 0.7em;
+    white-space: nowrap;
+}
+
+i-select option.focussed {
+    background-color: #B3D4FF;
+}
+
+i-select option.selected:before {
+    content: '*';
+    margin-left: -0.7em;
+    padding-right: 0.25em;
+}
+
+i-select option:before,
+i-select option:after {
+    content: '';
+    padding: 0;
+    margin: 0;
+}
+
+/* color specification:; */
+
+i-select >span >span {
+    background-color: #FFF;
+    border-color: #000;
+}
+
+i-select option:hover {
+    background-color: #B3D4FF;
+}
+
+i-select.i-focused > button span.pointer,
+i-select.i-primary > button span.pointer {
+    border-top: 0.5em solid #FEFEFE;
+}
